@@ -62,7 +62,7 @@ class ArchitectureTest {
                 .resideInAPackage("..models..")
                 .should()
                 .onlyDependOnClassesThat()
-                .resideInAnyPackage("..models..", "java..", "com.fasterxml.jackson..")
+                .resideInAnyPackage("..models..", "java..", "com.fasterxml.jackson..", "..lombok..")
                 .check(classes);
     }
 
