@@ -4,25 +4,64 @@
                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
                   xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0w4mjzu"
-                  targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.40.0"
-                  modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+                  targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0"
+                  modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
   <bpmn:process id="message-receiver" isExecutable="true">
     <bpmn:extensionElements>
-      <zeebe:versionTag value="0.2" />
+        <zeebe:versionTag value="1.0"/>
     </bpmn:extensionElements>
+      <bpmn:startEvent id="StartEvent_Email" name="Customer email received"
+                       zeebe:modelerTemplate="io.camunda.connectors.inbound.EmailMessageStart.v1"
+                       zeebe:modelerTemplateVersion="2"
+                       zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+          <bpmn:extensionElements>
+              <zeebe:properties>
+                  <zeebe:property name="inbound.type" value="io.camunda:connector-email-inbound:1"/>
+                  <zeebe:property name="authentication.type" value="simple"/>
+                  <zeebe:property name="authentication.username" value="{{secrets.AI_AGENT_EMAIL_USERNAME}}"/>
+                  <zeebe:property name="authentication.password" value="{{secrets.AI_AGENT_EMAIL_PASSWORD}}"/>
+                  <zeebe:property name="data.imapConfig.imapHost" value="{{secrets.AI_AGENT_IMAP_SERVER}}"/>
+                  <zeebe:property name="data.imapConfig.imapPort" value="993"/>
+                  <zeebe:property name="data.imapConfig.imapCryptographicProtocol" value="TLS"/>
+                  <zeebe:property name="data.pollingWaitTime" value="PT10S"/>
+                  <zeebe:property name="data.pollingConfigDiscriminator" value="unseenPollingConfig"/>
+                  <zeebe:property name="data.pollingConfig.handlingStrategy" value="READ"/>
+                  <zeebe:property name="consumeUnmatchedEvents" value="false"/>
+                  <zeebe:property name="correlationRequired" value="notRequired"/>
+                  <zeebe:property name="deduplicationModeManualFlag" value="false"/>
+                  <zeebe:property name="deduplicationMode" value="AUTO"/>
+                  <zeebe:property name="resultVariable" value="supportCase"/>
+                  <zeebe:property name="resultExpression"
+                                  value="== {&#10;    &#34;subject&#34;: subject,&#10;    &#34;request&#34;: plainTextBody&#10;}"/>
+              </zeebe:properties>
+              <zeebe:ioMapping/>
+          </bpmn:extensionElements>
+          <bpmn:outgoing>Flow_17yswsl</bpmn:outgoing>
+          <bpmn:messageEventDefinition id="MessageEventDefinition_1ygmb0p" messageRef="Message_0o7wtk9"/>
+      </bpmn:startEvent>
     <bpmn:endEvent id="Event_1gdoluy">
       <bpmn:incoming>Flow_1ehxd7q</bpmn:incoming>
     </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_0eu3bw7" sourceRef="Gateway_0zc209k" targetRef="Task_SendBPMNMessage"/>
+      <bpmn:sequenceFlow id="Flow_0pemwmw" sourceRef="StartEvent_WebHook" targetRef="Gateway_0zc209k"/>
+      <bpmn:sequenceFlow id="Flow_17yswsl" sourceRef="StartEvent_Email" targetRef="Gateway_0zc209k"/>
     <bpmn:sequenceFlow id="Flow_1ehxd7q" sourceRef="Task_SendBPMNMessage" targetRef="Event_1gdoluy" />
-    <bpmn:sendTask id="Task_SendBPMNMessage" name="Start Case Matching"
-                   zeebe:modelerTemplate="io.camunda.connectors.message.sendtask.v1" zeebe:modelerTemplateVersion="0"
-                   zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZwogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHdpZHRoPSIyMDAwIgogICBoZWlnaHQ9IjIwMDAiCiAgIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiCiAgIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4KICA8cGF0aAogICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwIgogICAgIGQ9Im0gMCwyODQgMjAwMCwwIC0xMDAwLDU1NCB6Ii8+CiAgPHBhdGgKICAgICBzdHlsZT0iY29sb3I6IzAwMDAwMCIKICAgICBkPSJtIDAsNDUyIDEwMDAsNTQ4IDEwMDAsLTU0OCAwLDEwOTYgLTIwMDAsMCB6Ii8+Cjwvc3ZnPgo=">
+      <bpmn:sequenceFlow id="Flow_1kjsy4n" sourceRef="Event_02j563c" targetRef="Gateway_0zc209k"/>
+      <bpmn:exclusiveGateway id="Gateway_0zc209k">
+          <bpmn:incoming>Flow_0pemwmw</bpmn:incoming>
+          <bpmn:incoming>Flow_1kjsy4n</bpmn:incoming>
+          <bpmn:incoming>Flow_17yswsl</bpmn:incoming>
+          <bpmn:outgoing>Flow_0eu3bw7</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sendTask id="Task_SendBPMNMessage" name="Start Case Matching"
+                     zeebe:modelerTemplate="io.camunda.connectors.message.sendtask.v1" zeebe:modelerTemplateVersion="0"
+                     zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZwogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHdpZHRoPSIyMDAwIgogICBoZWlnaHQ9IjIwMDAiCiAgIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiCiAgIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4KICA8cGF0aAogICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwIgogICAgIGQ9Im0gMCwyODQgMjAwMCwwIC0xMDAwLDU1NCB6Ii8+CiAgPHBhdGgKICAgICBzdHlsZT0iY29sb3I6IzAwMDAwMCIKICAgICBkPSJtIDAsNDUyIDEwMDAsNTQ4IDEwMDAsLTU0OCAwLDEwOTYgLTIwMDAsMCB6Ii8+Cjwvc3ZnPgo=">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
         <zeebe:ioMapping>
-          <zeebe:input source="UnmatchedCommunicationReceived" target="messageName"/>
-          <zeebe:input source="=uuid()" target="correlationKey"/>
-          <zeebe:input source="={&#34;supportCase&#34;: supportCase }" target="variables"/>
+            <zeebe:input source="UnmatchedCommunicationReceived" target="messageName"/>
+            <zeebe:input source="=uuid()" target="correlationKey"/>
+            <zeebe:input source="={&#34;supportCase&#34;: supportCase }" target="variables"/>
           <zeebe:input source="publish" target="correlationType.type" />
           <zeebe:input source="PT60S" target="correlationType.timeToLive" />
           <zeebe:input source="=supportCase.communicationContext.conversationId" target="correlationType.messageId" />
@@ -36,15 +75,19 @@
       <bpmn:incoming>Flow_0eu3bw7</bpmn:incoming>
       <bpmn:outgoing>Flow_1ehxd7q</bpmn:outgoing>
     </bpmn:sendTask>
-    <bpmn:startEvent id="StartEvent_OSS_WebHook" name="Webhook"
-                     zeebe:modelerTemplate="io.camunda.connectors.webhook.WebhookConnectorStartMessage.v1"
-                     zeebe:modelerTemplateVersion="13"
-                     zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyBpZD0naWNvbicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTgnIGhlaWdodD0nMTgnIHZpZXdCb3g9JzAgMCAzMiAzMic+CiAgPGRlZnM+CiAgICA8c3R5bGU+LmNscy0xIHsgZmlsbDogbm9uZTsgfTwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoCiAgICBkPSdNMjQsMjZhMywzLDAsMSwwLTIuODE2NC00SDEzdjFhNSw1LDAsMSwxLTUtNVYxNmE3LDcsMCwxLDAsNi45Mjg3LDhoNi4yNTQ5QTIuOTkxNCwyLjk5MTQsMCwwLDAsMjQsMjZaJy8+CiAgPHBhdGgKICAgIGQ9J00yNCwxNmE3LjAyNCw3LjAyNCwwLDAsMC0yLjU3LjQ4NzNsLTMuMTY1Ni01LjUzOTVhMy4wNDY5LDMuMDQ2OSwwLDEsMC0xLjczMjYuOTk4NWw0LjExODksNy4yMDg1Ljg2ODYtLjQ5NzZhNS4wMDA2LDUuMDAwNiwwLDEsMS0xLjg1MSw2Ljg0MThMMTcuOTM3LDI2LjUwMUE3LjAwMDUsNy4wMDA1LDAsMSwwLDI0LDE2WicvPgogIDxwYXRoCiAgICBkPSdNOC41MzIsMjAuMDUzN2EzLjAzLDMuMDMsMCwxLDAsMS43MzI2Ljk5ODVDMTEuNzQsMTguNDcsMTMuODYsMTQuNzYwNywxMy44OSwxNC43MDhsLjQ5NzYtLjg2ODItLjg2NzctLjQ5N2E1LDUsMCwxLDEsNi44MTItMS44NDM4bDEuNzMxNSwxLjAwMmE3LjAwMDgsNy4wMDA4LDAsMSwwLTEwLjM0NjIsMi4wMzU2Yy0uNDU3Ljc0MjctMS4xMDIxLDEuODcxNi0yLjA3MzcsMy41NzI4WicvPgogIDxyZWN0IGlkPSdfVHJhbnNwYXJlbnRfUmVjdGFuZ2xlXycgZGF0YS1uYW1lPScmbHQ7VHJhbnNwYXJlbnQgUmVjdGFuZ2xlJmd0OycgY2xhc3M9J2Nscy0xJwogICAgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJy8+Cjwvc3ZnPg==">
+      <bpmn:startEvent id="Event_02j563c" name="Test">
+          <bpmn:extensionElements/>
+          <bpmn:outgoing>Flow_1kjsy4n</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:startEvent id="StartEvent_WebHook" name="Webhook"
+                       zeebe:modelerTemplate="io.camunda.connectors.webhook.WebhookConnectorStartMessage.v1"
+                       zeebe:modelerTemplateVersion="13"
+                       zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyBpZD0naWNvbicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTgnIGhlaWdodD0nMTgnIHZpZXdCb3g9JzAgMCAzMiAzMic+CiAgPGRlZnM+CiAgICA8c3R5bGU+LmNscy0xIHsgZmlsbDogbm9uZTsgfTwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoCiAgICBkPSdNMjQsMjZhMywzLDAsMSwwLTIuODE2NC00SDEzdjFhNSw1LDAsMSwxLTUtNVYxNmE3LDcsMCwxLDAsNi45Mjg3LDhoNi4yNTQ5QTIuOTkxNCwyLjk5MTQsMCwwLDAsMjQsMjZaJy8+CiAgPHBhdGgKICAgIGQ9J00yNCwxNmE3LjAyNCw3LjAyNCwwLDAsMC0yLjU3LjQ4NzNsLTMuMTY1Ni01LjUzOTVhMy4wNDY5LDMuMDQ2OSwwLDEsMC0xLjczMjYuOTk4NWw0LjExODksNy4yMDg1Ljg2ODYtLjQ5NzZhNS4wMDA2LDUuMDAwNiwwLDEsMS0xLjg1MSw2Ljg0MThMMTcuOTM3LDI2LjUwMUE3LjAwMDUsNy4wMDA1LDAsMSwwLDI0LDE2WicvPgogIDxwYXRoCiAgICBkPSdNOC41MzIsMjAuMDUzN2EzLjAzLDMuMDMsMCwxLDAsMS43MzI2Ljk5ODVDMTEuNzQsMTguNDcsMTMuODYsMTQuNzYwNywxMy44OSwxNC43MDhsLjQ5NzYtLjg2ODItLjg2NzctLjQ5N2E1LDUsMCwxLDEsNi44MTItMS44NDM4bDEuNzMxNSwxLjAwMmE3LjAwMDgsNy4wMDA4LDAsMSwwLTEwLjM0NjIsMi4wMzU2Yy0uNDU3Ljc0MjctMS4xMDIxLDEuODcxNi0yLjA3MzcsMy41NzI4WicvPgogIDxyZWN0IGlkPSdfVHJhbnNwYXJlbnRfUmVjdGFuZ2xlXycgZGF0YS1uYW1lPScmbHQ7VHJhbnNwYXJlbnQgUmVjdGFuZ2xlJmd0OycgY2xhc3M9J2Nscy0xJwogICAgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJy8+Cjwvc3ZnPg==">
       <bpmn:extensionElements>
         <zeebe:properties>
           <zeebe:property name="inbound.type" value="io.camunda:webhook:1" />
           <zeebe:property name="inbound.method" value="post" />
-          <zeebe:property name="inbound.context" value="webhook"/>
+            <zeebe:property name="inbound.context" value="webhook"/>
           <zeebe:property name="inbound.shouldValidateHmac" value="disabled" />
           <zeebe:property name="inbound.auth.type" value="NONE" />
           <zeebe:property name="consumeUnmatchedEvents" value="true" />
@@ -58,50 +101,6 @@
       <bpmn:outgoing>Flow_0pemwmw</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1ot26qv" messageRef="Message_1b7rezg" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_0pemwmw" sourceRef="StartEvent_OSS_WebHook" targetRef="Gateway_0zc209k" />
-    <bpmn:startEvent id="Event_02j563c" name="Test">
-      <bpmn:extensionElements/>
-      <bpmn:outgoing>Flow_1kjsy4n</bpmn:outgoing>
-    </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1kjsy4n" sourceRef="Event_02j563c" targetRef="Gateway_0zc209k" />
-    <bpmn:startEvent id="StartEvent_Email" name="Customer email received" zeebe:modelerTemplate="io.camunda.connectors.inbound.EmailMessageStart.v1" zeebe:modelerTemplateVersion="2" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
-      <bpmn:extensionElements>
-        <zeebe:properties>
-          <zeebe:property name="inbound.type" value="io.camunda:connector-email-inbound:1" />
-          <zeebe:property name="authentication.type" value="simple" />
-          <zeebe:property name="authentication.username" value="{{secrets.HOLISTICON_AI_AGENT_EMAIL_USERNAME}}" />
-          <zeebe:property name="authentication.password" value="{{secrets.HOLISTICON_AI_AGENT_EMAIL_PASSWORD}}" />
-          <zeebe:property name="data.imapConfig.imapHost" value="{{secrets.HOLISTICON_AI_AGENT_IMAP_SERVER}}" />
-          <zeebe:property name="data.imapConfig.imapPort" value="993" />
-          <zeebe:property name="data.imapConfig.imapCryptographicProtocol" value="TLS" />
-          <zeebe:property name="data.pollingWaitTime" value="PT10S" />
-          <zeebe:property name="data.pollingConfigDiscriminator" value="unseenPollingConfig" />
-          <zeebe:property name="data.pollingConfig.handlingStrategy" value="READ" />
-          <zeebe:property name="consumeUnmatchedEvents" value="false" />
-          <zeebe:property name="correlationRequired" value="notRequired" />
-          <zeebe:property name="deduplicationModeManualFlag" value="false" />
-          <zeebe:property name="deduplicationMode" value="AUTO" />
-          <zeebe:property name="resultVariable" value="currentEmail" />
-          <zeebe:property name="resultExpression" />
-        </zeebe:properties>
-        <zeebe:ioMapping>
-          <zeebe:output source="=&#34;email&#34;" target="communicationChannel" />
-          <zeebe:output source="=currentEmail" target="currentEmail" />
-          <zeebe:output source="=currentEmail.plainTextBody" target="customerRequest" />
-          <zeebe:output source="={&#10;    &#34;subject&#34;: currentEmail.subject,&#10;    &#34;request&#34;: currentEmail.plainTextBody,&#10;    &#34;communicationContext&#34;: {&#10;        &#34;channel&#34; : &#34;email&#34;,&#10;        &#34;emailAddress&#34;: currentEmail.fromAddress,&#10;        &#34;conversationId&#34;: currentEmail.messageId&#10;    }&#10;}" target="supportCase" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
-      <bpmn:outgoing>Flow_17yswsl</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_1ygmb0p" messageRef="Message_0o7wtk9" />
-    </bpmn:startEvent>
-    <bpmn:exclusiveGateway id="Gateway_0zc209k">
-      <bpmn:incoming>Flow_0pemwmw</bpmn:incoming>
-      <bpmn:incoming>Flow_1kjsy4n</bpmn:incoming>
-      <bpmn:incoming>Flow_17yswsl</bpmn:incoming>
-      <bpmn:outgoing>Flow_0eu3bw7</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_17yswsl" sourceRef="StartEvent_Email" targetRef="Gateway_0zc209k" />
-    <bpmn:sequenceFlow id="Flow_0eu3bw7" sourceRef="Gateway_0zc209k" targetRef="Task_SendBPMNMessage"/>
   </bpmn:process>
   <bpmn:message id="Message_1b7rezg" name="f77394ea-a2a5-4455-8c15-97a3004874c4" zeebe:modelerTemplate="io.camunda.connectors.webhook.WebhookConnectorStartMessage.v1">
     <bpmn:extensionElements />
@@ -111,22 +110,22 @@
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="message-receiver">
       <bpmndi:BPMNShape id="Event_1gdoluy_di" bpmnElement="Event_1gdoluy">
-        <dc:Bounds x="782" y="232" width="36" height="36"/>
+          <dc:Bounds x="782" y="232" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0t34g44_di" bpmnElement="Task_SendBPMNMessage">
-        <dc:Bounds x="610" y="210" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+          <dc:Bounds x="610" y="210" width="100" height="80"/>
+          <bpmndi:BPMNLabel/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0x9wfpp_di" bpmnElement="StartEvent_OSS_WebHook">
-        <dc:Bounds x="182" y="232" width="36" height="36"/>
+        <bpmndi:BPMNShape id="Event_0x9wfpp_di" bpmnElement="StartEvent_WebHook">
+            <dc:Bounds x="182" y="232" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="176" y="208" width="47" height="14"/>
+            <dc:Bounds x="176" y="208" width="47" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_02j563c_di" bpmnElement="Event_02j563c">
         <dc:Bounds x="182" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="190" y="125" width="21" height="14"/>
+            <dc:Bounds x="190" y="125" width="21" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0bgxirs_di" bpmnElement="StartEvent_Email">
@@ -139,11 +138,11 @@
         <dc:Bounds x="465" y="225" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1ehxd7q_di" bpmnElement="Flow_1ehxd7q">
-        <di:waypoint x="710" y="250"/>
-        <di:waypoint x="782" y="250"/>
+          <di:waypoint x="710" y="250"/>
+          <di:waypoint x="782" y="250"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pemwmw_di" bpmnElement="Flow_0pemwmw">
-        <di:waypoint x="218" y="250"/>
+          <di:waypoint x="218" y="250"/>
         <di:waypoint x="465" y="250" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1kjsy4n_di" bpmnElement="Flow_1kjsy4n">
@@ -157,8 +156,8 @@
         <di:waypoint x="490" y="275" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0eu3bw7_di" bpmnElement="Flow_0eu3bw7">
-        <di:waypoint x="515" y="250"/>
-        <di:waypoint x="610" y="250"/>
+          <di:waypoint x="515" y="250"/>
+          <di:waypoint x="610" y="250"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
