@@ -11,7 +11,7 @@ spring:
 camunda:
   process-test:
     # Switch from a managed to a remote runtime
-    runtime-mode: remote
+    # runtime-mode: remote
     # Change the connection (default: Camunda 8 Run)
     camunda-docker-image-version: 8.8.7
     remote:
@@ -20,11 +20,12 @@ camunda:
       client:
         rest-address: http://localhost:8088
         grpc-address: http://localhost:26500
+    connectors-enabled: true
+    #connectors-docker-image-name: camunda/connectors-bundle
     camunda-env-vars:
       CAMUNDA_LOG_LEVEL: DEBUG      # global log level for io.camunda
       ZEEBE_LOG_LEVEL: DEBUG        # Zeebe package level
       ES_LOG_LEVEL: DEBUG           # Elasticsearch logs
   # (optional) Connectors container logging
-  connectors-enabled: true
   connectors-env-vars:
     LOGGING_LEVEL_IO_CAMUNDA_CONNECTOR: DEBUG

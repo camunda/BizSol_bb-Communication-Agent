@@ -13,29 +13,29 @@
     </appender>
 
     <!-- ─── Silence framework noise in tests ─── -->
-    <logger name="org.springframework"             level="WARN" />
-    <logger name="io.camunda.client"              level="WARN" />
-    <logger name="io.camunda.zeebe"               level="WARN" />
-    <logger name="io.camunda.process.test"         level="DEBUG" />
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="io.camunda.client" level="WARN"/>
+    <logger name="io.camunda.zeebe" level="WARN"/>
+    <logger name="io.camunda.process.test" level="DEBUG"/>
 
     <!-- Testcontainers / Docker – extremely chatty -->
-    <logger name="org.testcontainers"              level="WARN" />
-    <logger name="tc"                              level="WARN" />
-    <logger name="com.github.dockerjava"           level="WARN" />
+    <logger name="org.testcontainers" level="WARN"/>
+    <logger name="tc" level="WARN"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
 
     <!-- gRPC / Netty -->
-    <logger name="io.grpc"                         level="WARN" />
-    <logger name="io.netty"                        level="WARN" />
+    <logger name="io.grpc" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
 
     <!-- WireMock -->
-    <logger name="wiremock"                        level="WARN" />
-    <logger name="com.github.tomakehurst"          level="WARN" />
+    <logger name="wiremock" level="WARN"/>
+    <logger name="com.github.tomakehurst" level="WARN"/>
 
     <!-- Application code – keep verbose -->
-    <logger name="io.camunda.bizsol"               level="DEBUG" />
+    <logger name="io.camunda.bizsol" level="DEBUG"/>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </root>
 
 </configuration>

@@ -5,6 +5,6 @@ import lombok.extern.jackson.Jacksonized;
 
 @Builder
 @Jacksonized
-public record PhoneCommunicationContext(String channel, String conversationId)
+public record PhoneCommunicationContext(String channel, String conversationId, String phoneNumber)
         implements CommunicationContext {
 }

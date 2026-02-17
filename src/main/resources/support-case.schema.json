@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/support-case.schema.json",
+  "title": "Support Case Request",
+  "description": "Schema describing the data expected in a support case request payload.",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string",
+      "description": "Short summary of the support case."
+    },
+    "request": {
+      "type": "string",
+      "description": "Detailed message body sent by the customer."
+    },
+    "communicationContext": {
+      "type": "object",
+      "description": "Metadata describing how the customer contacted support.",
+      "properties": {
+        "channel": {
+          "type": "string",
+          "description": "Channel of the incoming request (e.g., email)."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the customer."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the customer."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Identifier that ties the customer message to a conversation thread."
+        }
+      },
+      "required": [
+        "channel",
+        "conversationId"
+      ],
+      "additionalProperties": true
+    },
+    "references": {
+      "type": "array",
+      "description": "Key/value pairs that point to related reference data (e.g., contract IDs, previous conversation IDs).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Reference name or type."
+          },
+          "value": {
+            "type": "string",
+            "description": "Stored value for the reference key."
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "subject",
+    "request",
+    "communicationContext"
+  ],
+  "additionalProperties": false
+}

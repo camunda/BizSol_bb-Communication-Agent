@@ -18,21 +18,21 @@
               <zeebe:properties>
                   <zeebe:property name="inbound.type" value="io.camunda:connector-email-inbound:1"/>
                   <zeebe:property name="authentication.type" value="simple"/>
-                  <zeebe:property name="authentication.username" value="{{secrets.AI_AGENT_EMAIL_USERNAME}}"/>
-                  <zeebe:property name="authentication.password" value="{{secrets.AI_AGENT_EMAIL_PASSWORD}}"/>
-                  <zeebe:property name="data.imapConfig.imapHost" value="{{secrets.AI_AGENT_IMAP_SERVER}}"/>
-                  <zeebe:property name="data.imapConfig.imapPort" value="993"/>
-                  <zeebe:property name="data.imapConfig.imapCryptographicProtocol" value="TLS"/>
-                  <zeebe:property name="data.pollingWaitTime" value="PT10S"/>
+                  <zeebe:property name="authentication.username" value="{{secrets.INBOUND_IMAP_USERNAME}}"/>
+                  <zeebe:property name="authentication.password" value="{{secrets.INBOUND_IMAP_PASSWORD}}"/>
+                  <zeebe:property name="data.imapConfig.imapHost" value="{{secrets.INBOUND_IMAP_SERVER}}"/>
+                  <zeebe:property name="data.imapConfig.imapPort" value="{{secrets.INBOUND_IMAP_PORT}}"/>
+                  <zeebe:property name="data.imapConfig.imapCryptographicProtocol" value="NONE"/>
+                  <zeebe:property name="data.pollingWaitTime" value="PT1S"/>
                   <zeebe:property name="data.pollingConfigDiscriminator" value="unseenPollingConfig"/>
                   <zeebe:property name="data.pollingConfig.handlingStrategy" value="READ"/>
                   <zeebe:property name="consumeUnmatchedEvents" value="false"/>
                   <zeebe:property name="correlationRequired" value="notRequired"/>
                   <zeebe:property name="deduplicationModeManualFlag" value="false"/>
                   <zeebe:property name="deduplicationMode" value="AUTO"/>
-                  <zeebe:property name="resultVariable" value="supportCase"/>
+                  <zeebe:property name="resultVariable" value="rawEmail"/>
                   <zeebe:property name="resultExpression"
-                                  value="== {&#10;    &#34;subject&#34;: subject,&#10;    &#34;request&#34;: plainTextBody&#10;}"/>
+                                  value="={&#10;  &#34;supportCase&#34;: {&#10;    &#34;subject&#34;: subject,&#10;    &#34;request&#34;: plainTextBody,&#10;    &#34;receivedDateTime&#34;: receivedDateTime,&#10;    &#34;attachments&#34;: attachments,&#10;    &#34;communicationContext&#34;: {&#10;      &#34;channel&#34;: &#34;email&#34;,&#10;      &#34;conversationId&#34;: messageId,&#10;      &#34;emailAddress&#34;: fromAddress&#10;    }&#10;}&#10;"/>
               </zeebe:properties>
               <zeebe:ioMapping/>
           </bpmn:extensionElements>
@@ -109,18 +109,21 @@
   <bpmn:message id="Message_3hatd6n" name="MSG_GetVocal" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="message-receiver">
+        <bpmndi:BPMNShape id="Event_0bgxirs_di" bpmnElement="StartEvent_Email">
+            <dc:Bounds x="182" y="412" width="36" height="36"/>
+            <bpmndi:BPMNLabel>
+                <dc:Bounds x="161" y="374.5" width="78" height="27"/>
+            </bpmndi:BPMNLabel>
+        </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1gdoluy_di" bpmnElement="Event_1gdoluy">
           <dc:Bounds x="782" y="232" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Gateway_0zc209k_di" bpmnElement="Gateway_0zc209k" isMarkerVisible="true">
+            <dc:Bounds x="465" y="225" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0t34g44_di" bpmnElement="Task_SendBPMNMessage">
           <dc:Bounds x="610" y="210" width="100" height="80"/>
           <bpmndi:BPMNLabel/>
-      </bpmndi:BPMNShape>
-        <bpmndi:BPMNShape id="Event_0x9wfpp_di" bpmnElement="StartEvent_WebHook">
-            <dc:Bounds x="182" y="232" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-            <dc:Bounds x="176" y="208" width="47" height="14"/>
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_02j563c_di" bpmnElement="Event_02j563c">
         <dc:Bounds x="182" y="82" width="36" height="36" />
@@ -128,36 +131,33 @@
             <dc:Bounds x="190" y="125" width="21" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0bgxirs_di" bpmnElement="StartEvent_Email">
-        <dc:Bounds x="182" y="412" width="36" height="36" />
+        <bpmndi:BPMNShape id="Event_0x9wfpp_di" bpmnElement="StartEvent_WebHook">
+            <dc:Bounds x="182" y="232" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="161" y="374.5" width="78" height="27" />
+            <dc:Bounds x="176" y="208" width="47" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0zc209k_di" bpmnElement="Gateway_0zc209k" isMarkerVisible="true">
-        <dc:Bounds x="465" y="225" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1ehxd7q_di" bpmnElement="Flow_1ehxd7q">
-          <di:waypoint x="710" y="250"/>
-          <di:waypoint x="782" y="250"/>
+        <bpmndi:BPMNEdge id="Flow_0eu3bw7_di" bpmnElement="Flow_0eu3bw7">
+            <di:waypoint x="515" y="250"/>
+            <di:waypoint x="610" y="250"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pemwmw_di" bpmnElement="Flow_0pemwmw">
           <di:waypoint x="218" y="250"/>
         <di:waypoint x="465" y="250" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1kjsy4n_di" bpmnElement="Flow_1kjsy4n">
-        <di:waypoint x="218" y="100" />
-        <di:waypoint x="490" y="100" />
-        <di:waypoint x="490" y="225" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_17yswsl_di" bpmnElement="Flow_17yswsl">
         <di:waypoint x="218" y="430" />
         <di:waypoint x="490" y="430" />
         <di:waypoint x="490" y="275" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0eu3bw7_di" bpmnElement="Flow_0eu3bw7">
-          <di:waypoint x="515" y="250"/>
-          <di:waypoint x="610" y="250"/>
+        <bpmndi:BPMNEdge id="Flow_1ehxd7q_di" bpmnElement="Flow_1ehxd7q">
+            <di:waypoint x="710" y="250"/>
+            <di:waypoint x="782" y="250"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_1kjsy4n_di" bpmnElement="Flow_1kjsy4n">
+            <di:waypoint x="218" y="100"/>
+            <di:waypoint x="490" y="100"/>
+            <di:waypoint x="490" y="225"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
