@@ -32,7 +32,7 @@
                   <zeebe:property name="deduplicationMode" value="AUTO"/>
                   <zeebe:property name="resultVariable" value="rawEmail"/>
                   <zeebe:property name="resultExpression"
-                                  value="={&#10;  &#34;supportCase&#34;: {&#10;    &#34;subject&#34;: subject,&#10;    &#34;request&#34;: plainTextBody,&#10;    &#34;receivedDateTime&#34;: receivedDateTime,&#10;    &#34;attachments&#34;: attachments,&#10;    &#34;communicationContext&#34;: {&#10;      &#34;channel&#34;: &#34;email&#34;,&#10;      &#34;conversationId&#34;: messageId,&#10;      &#34;emailAddress&#34;: fromAddress&#10;    }&#10;}&#10;"/>
+                                  value="={&#10;  &#34;supportCase&#34;: {&#10;    &#34;subject&#34;: subject,&#10;    &#34;request&#34;: plainTextBody,&#10;    &#34;receivedDateTime&#34;: receivedDateTime,&#10;    &#34;attachments&#34;: attachments,&#10;    &#34;communicationContext&#34;: {&#10;      &#34;channel&#34;: &#34;email&#34;,&#10;      &#34;conversationId&#34;: messageId,&#10;      &#34;emailAddress&#34;: fromAddress&#10;    }&#10;}&#10;}"/>
               </zeebe:properties>
               <zeebe:ioMapping/>
           </bpmn:extensionElements>

@@ -4,22 +4,22 @@
                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
                   xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0egaanq"
-                  targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.40.0"
+                  targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0"
                   modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
-    <bpmn:process id="Process_CaseMatching" isExecutable="true">
+    <bpmn:process id="case-matching" isExecutable="true">
         <bpmn:startEvent id="StartEvent_1">
             <bpmn:outgoing>Flow_1v9hvfy</bpmn:outgoing>
             <bpmn:messageEventDefinition id="MessageEventDefinition_05g85w0" messageRef="Message_3lngj06"/>
         </bpmn:startEvent>
-        <bpmn:endEvent id="Event_13xwu2d" zeebe:modelerTemplate="io.camunda.connectors.message.end.v1"
-                       zeebe:modelerTemplateVersion="0"
+        <bpmn:endEvent id="Event_SendCustomerCommunicationReceived"
+                       zeebe:modelerTemplate="io.camunda.connectors.message.end.v1" zeebe:modelerTemplateVersion="0"
                        zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZwogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHdpZHRoPSIyMDAwIgogICBoZWlnaHQ9IjIwMDAiCiAgIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiCiAgIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4KICA8cGF0aAogICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwIgogICAgIGQ9Im0gMCwyODQgMjAwMCwwIC0xMDAwLDU1NCB6Ii8+CiAgPHBhdGgKICAgICBzdHlsZT0iY29sb3I6IzAwMDAwMCIKICAgICBkPSJtIDAsNDUyIDEwMDAsNTQ4IDEwMDAsLTU0OCAwLDEwOTYgLTIwMDAsMCB6Ii8+Cjwvc3ZnPgo=">
             <bpmn:extensionElements>
                 <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3"/>
                 <zeebe:ioMapping>
                     <zeebe:input source="CustomerCommunicationReceived" target="messageName"/>
-                    <zeebe:input source="supportCase.correlationKey" target="correlationKey"/>
-                    <zeebe:input source="=supportCase" target="variables"/>
+                    <zeebe:input source="=correlationKey" target="correlationKey"/>
+                    <zeebe:input source="={&#34;supportCase&#34;: supportCase }" target="variables"/>
                     <zeebe:input source="publish" target="correlationType.type"/>
                 </zeebe:ioMapping>
                 <zeebe:taskHeaders>
@@ -31,32 +31,21 @@
             <bpmn:incoming>Flow_0kfwt3p</bpmn:incoming>
             <bpmn:messageEventDefinition id="MessageEventDefinition_1f048s1"/>
         </bpmn:endEvent>
-        <bpmn:sequenceFlow id="Flow_0kfwt3p" sourceRef="Task_CaseMatching" targetRef="Event_13xwu2d"/>
-        <bpmn:startEvent id="Event_1uv5gxu" name="Test">
-            <bpmn:extensionElements>
-                <zeebe:ioMapping>
-                    <zeebe:output
-                            source="={&#10;    &#34;subject&#34;: &#34;Request for Proposal&#34;,&#10;    &#34;request&#34;: &#34;Hi, i want to get an offer for your product. Thx&#34;,&#10;    &#34;communicationContext&#34;: {&#10;        &#34;channel&#34;: &#34;email&#34;,&#10;        &#34;emailAddress&#34;: &#34;michael.meier@holisticon.de&#34;,&#10;        &#34;conversationId&#34;: &#34;&#60;463E2D53-C7EF-4E2C-88DE-AC5432AEDD20@holisticon.de&#62;&#34;&#10;    }&#10;}"
-                            target="supportCase"/>
-                </zeebe:ioMapping>
-            </bpmn:extensionElements>
-            <bpmn:outgoing>Flow_0sr6qri</bpmn:outgoing>
-        </bpmn:startEvent>
+        <bpmn:sequenceFlow id="Flow_0kfwt3p" sourceRef="Task_CaseMatching"
+                           targetRef="Event_SendCustomerCommunicationReceived"/>
         <bpmn:scriptTask id="Task_CaseMatching" name="Match Case">
             <bpmn:extensionElements>
                 <zeebe:script
-                        expression="=if supportCase.communicationContext.channel = &#34;email&#34; then supportCase.communicationContext.emailAddress&#10;else if supportCase.communicationContext.channel = &#34;phone&#34; then supportCase.communicationContext.phone&#10;else supportCase.communicationContext.conversationId"
+                        expression="=if supportCase.communicationContext.channel = &#34;email&#34; then supportCase.communicationContext.emailAddress&#10;else if supportCase.communicationContext.channel = &#34;phone&#34; then supportCase.communicationContext.phoneNumber&#10;else supportCase.communicationContext.conversationId"
                         resultVariable="correlationKey"/>
                 <zeebe:ioMapping>
-                    <zeebe:output source="=correlationKey" target="supportCase.correlationKey"/>
+                    <zeebe:output source="=correlationKey" target="correlationKey"/>
                 </zeebe:ioMapping>
             </bpmn:extensionElements>
             <bpmn:incoming>Flow_1v9hvfy</bpmn:incoming>
-            <bpmn:incoming>Flow_0sr6qri</bpmn:incoming>
             <bpmn:outgoing>Flow_0kfwt3p</bpmn:outgoing>
         </bpmn:scriptTask>
         <bpmn:sequenceFlow id="Flow_1v9hvfy" sourceRef="StartEvent_1" targetRef="Task_CaseMatching"/>
-        <bpmn:sequenceFlow id="Flow_0sr6qri" sourceRef="Event_1uv5gxu" targetRef="Task_CaseMatching"/>
         <bpmn:textAnnotation id="TextAnnotation_0p54tkg">
             <bpmn:text>Assign supportCase.correlationKey</bpmn:text>
         </bpmn:textAnnotation>
@@ -65,18 +54,12 @@
     </bpmn:process>
     <bpmn:message id="Message_3lngj06" name="UnmatchedCommunicationReceived"/>
     <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_CaseMatching">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="case-matching">
             <bpmndi:BPMNShape id="Event_0ccv1wt_di" bpmnElement="StartEvent_1">
                 <dc:Bounds x="182" y="222" width="36" height="36"/>
             </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Event_10n1558_di" bpmnElement="Event_13xwu2d">
+            <bpmndi:BPMNShape id="Event_10n1558_di" bpmnElement="Event_SendCustomerCommunicationReceived">
                 <dc:Bounds x="672" y="222" width="36" height="36"/>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Event_1uv5gxu_di" bpmnElement="Event_1uv5gxu">
-                <dc:Bounds x="182" y="132" width="36" height="36"/>
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="190" y="175" width="21" height="14"/>
-                </bpmndi:BPMNLabel>
             </bpmndi:BPMNShape>
             <bpmndi:BPMNShape id="Activity_13vrd2u_di" bpmnElement="Task_CaseMatching">
                 <dc:Bounds x="410" y="200" width="100" height="80"/>
@@ -91,12 +74,6 @@
             </bpmndi:BPMNEdge>
             <bpmndi:BPMNEdge id="Flow_1v9hvfy_di" bpmnElement="Flow_1v9hvfy">
                 <di:waypoint x="218" y="240"/>
-                <di:waypoint x="410" y="240"/>
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_0sr6qri_di" bpmnElement="Flow_0sr6qri">
-                <di:waypoint x="218" y="150"/>
-                <di:waypoint x="349" y="150"/>
-                <di:waypoint x="349" y="240"/>
                 <di:waypoint x="410" y="240"/>
             </bpmndi:BPMNEdge>
             <bpmndi:BPMNEdge id="Association_0eoaqmk_di" bpmnElement="Association_0eoaqmk">

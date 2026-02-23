@@ -6,6 +6,7 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Jacksonized
 public record Attachment(String documentId, String storeId, String contentHash, Metadata metadata) {
-    public record Metadata(String fileName, String contentType, Long size) {
-    }
+    @Builder
+    @Jacksonized
+    public record Metadata(String fileName, String contentType, Long size) {}
 }

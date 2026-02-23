@@ -1,5 +1,8 @@
 package io.camunda.bizsol.bb.comm_agent;
 
+import static io.camunda.process.test.api.CamundaAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.bizsol.bb.comm_agent.models.EmailCommunicationContext;
@@ -8,33 +11,26 @@ import io.camunda.client.CamundaClient;
 import io.camunda.client.api.response.ProcessInstanceEvent;
 import io.camunda.process.test.api.CamundaProcessTestContext;
 import io.camunda.process.test.api.CamundaSpringProcessTest;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
-
-import static io.camunda.process.test.api.CamundaAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(
         properties = {
-                "camunda.client.worker.defaults.enabled=false",
+            "camunda.client.worker.defaults.enabled=false",
         })
 @CamundaSpringProcessTest
 public class ReceiveMessageTest {
 
     private static final String PROCESS_DEFINITION_ID = "message-receiver";
 
-    @Autowired
-    private CamundaClient client;
-    @Autowired
-    private CamundaProcessTestContext processTestContext;
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private CamundaClient client;
+    @Autowired private CamundaProcessTestContext processTestContext;
+    @Autowired private ObjectMapper objectMapper;
 
     @Test
     void shouldSendBpmnMessageWithSupportCaseVariables() {
