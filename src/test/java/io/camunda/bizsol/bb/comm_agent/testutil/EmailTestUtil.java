@@ -9,7 +9,6 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
@@ -17,8 +16,7 @@ import java.util.Properties;
 
 public final class EmailTestUtil {
 
-    private EmailTestUtil() {
-    }
+    private EmailTestUtil() {}
 
     /**
      * Sends a multipart test email with a plain text plainTextBody and optional attachments loaded
