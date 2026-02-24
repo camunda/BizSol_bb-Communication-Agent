@@ -1,9 +1,18 @@
+spring:
+  ai:
+    openai:
+      base-url: http://localhost:8080
+      api-key: "dummy"
+      chat:
+        options:
+          model: model
+          stream-usage: true
 camunda:
   process-test:
     # Switch from a managed to a remote runtime
     # runtime-mode: remote
     # Change the connection (default: Camunda 8 Run)
-    camunda-docker-image-version: 8.8.7
+    camunda-docker-image-version: 8.8.8
     remote:
       camunda-monitoring-api-address: http://localhost:9600
       connectors-rest-api-address: http://localhost:8086
@@ -16,6 +25,7 @@ camunda:
       CAMUNDA_LOG_LEVEL: DEBUG      # global log level for io.camunda
       ZEEBE_LOG_LEVEL: DEBUG        # Zeebe package level
       ES_LOG_LEVEL: DEBUG           # Elasticsearch logs
+    connectors-docker-image-version: 8.8.8
   # (optional) Connectors container logging
   connectors-env-vars:
     LOGGING_LEVEL_IO_CAMUNDA_CONNECTOR: DEBUG
