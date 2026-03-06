@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+             id="drd_intent_matching" name="DRD" namespace="http://camunda.org/schema/1.0/dmn"
+             exporter="Camunda Modeler" exporterVersion="5.44.0" modeler:executionPlatform="Camunda Cloud"
+             modeler:executionPlatformVersion="8.8.0">
+  <decision id="intent_matching" name="Intents">
+    <decisionTable id="DecisionTable_0jm7vk1" hitPolicy="FIRST">
+      <input id="Input_1">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>subject</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" name="customer_intent" typeRef="string"/>
+      <rule id="DecisionRule_0n7r7z4">
+        <inputEntry id="UnaryTests_1xgwicz">
+          <text>matches(subject, "dog", "i")</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1t5k2xc">
+          <text>"DOG_INSURANCE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_056lhbh">
+        <inputEntry id="UnaryTests_1vjv4gv">
+          <text>matches(subject, "car", "i")</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0n923dq">
+          <text>"CAR_INSURANCE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xxrvyr">
+        <inputEntry id="UnaryTests_00zpuvv">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_03e3q64">
+          <text>"UNKNOWN"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape id="Decision_0d6t1w7_di" dmnElementRef="intent_matching">
+        <dc:Bounds height="80" width="180" x="160" y="100"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

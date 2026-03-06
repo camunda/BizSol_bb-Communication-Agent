@@ -32,7 +32,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@SpringBootTest(properties = {"CAMUNDA_CONNECTOR_SECRETPROVIDER_ENVIRONMENT_PREFIX=''"})
+@SpringBootTest(
+        properties = {
+            "CAMUNDA_CONNECTOR_SECRETPROVIDER_ENVIRONMENT_PREFIX=''",
+            "camunda.process-test.coverage.reportDirectory: target/coverage-report-integration"
+        })
 @CamundaSpringProcessTest
 @Testcontainers
 public class InboundIT {
@@ -173,7 +177,8 @@ public class InboundIT {
                         "correlationKey",
                         JsonNode.class,
                         correlationKey -> {
-                            assertThat(correlationKey.asText()).isEqualTo(TEST_EMAIL_ADDRESS);
+                            assertThat(correlationKey.asText())
+                                    .isEqualTo(TEST_EMAIL_ADDRESS + "/UNKNOWN");
                         })
                 .hasLocalVariableSatisfies(
                         SEND_MESSAGE_CONNECTOR_ELEMENT_ID,
