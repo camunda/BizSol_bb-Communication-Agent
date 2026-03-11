@@ -85,6 +85,21 @@ class CaseMatchingServiceTest {
         assertThat(correlationKey).isEqualTo("conversation-4711/UNKNOWN");
     }
 
+    @Test
+    void shouldHandleNullSubject() {
+        SupportCase supportCase =
+                supportCase(
+                        null,
+                        EmailCommunicationContext.builder()
+                                .conversationId("conv-5")
+                                .emailAddress("customer@camunda.com")
+                                .build());
+
+        String correlationKey = serviceUnderTest.matchCase(supportCase).value();
+
+        assertThat(correlationKey).isEqualTo("customer@camunda.com/UNKNOWN");
+    }
+
     private SupportCase supportCase(String subject, CommunicationContext communicationContext) {
         return SupportCase.builder()
                 .subject(subject)
