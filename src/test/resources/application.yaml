@@ -1,25 +1,19 @@
 spring:
   ai:
     openai-sdk:
-      base-url: https://models.github.ai/inference
-      api-key: ${GITHUB_TOKEN:empty}
-      git-hub-models: true
+      api-key: ${GITHUB_TOKEN:}
+      git-hub-models: true # uses https://models.github.ai/inference automatically
       chat:
         options:
-          model: gpt-5-mini-2025-08-07
+          model: openai/gpt-4.1-mini
           temperature: 1.0
 
 camunda:
   process-test:
     camunda-docker-image-version: 8.8.8
     connectors-enabled: true
-    camunda-env-vars:
-      CAMUNDA_LOG_LEVEL: DEBUG      # global log level for io.camunda
-      ZEEBE_LOG_LEVEL: DEBUG        # Zeebe package level
-      ES_LOG_LEVEL: DEBUG           # Elasticsearch logs
     connectors-docker-image-version: 8.8.8
     connectors-secrets:
-      LLM_MODEL: gpt-5-mini-2025-08-07
-  # (optional) Connectors container logging
-  connectors-env-vars:
-    LOGGING_LEVEL_IO_CAMUNDA_CONNECTOR: DEBUG
+      LLM_MODEL: openai/gpt-4.1-mini
+      LLM_API_ENDPOINT: https://models.github.ai/inference
+      LLM_API_KEY: ${GITHUB_TOKEN:}

@@ -123,7 +123,7 @@ public class CommunicationAgentIT {
                                         """
                                         .stripLeading(),
                                 """
-                                        <zeebe:input source="{{secrets.GITHUB_TOKEN}}" target="provider.openaiCompatible.endpoint" />
+                                        <zeebe:input source="{{secrets.LLM_API_ENDPOINT}}" target="provider.openaiCompatible.endpoint" />
                                         """
                                         .stripLeading()),
                         replace(
@@ -140,7 +140,7 @@ public class CommunicationAgentIT {
                                         <zeebe:input source="" target="provider.openaiCompatible.authentication.apiKey" />"""
                                         .stripLeading(),
                                 """
-                                        <zeebe:input source="https://models.github.ai/inference" target="provider.openaiCompatible.authentication.apiKey" />"""
+                                        <zeebe:input source="{{secrets.LLM_API_KEY}}" target="provider.openaiCompatible.authentication.apiKey" />"""
                                         .stripLeading()));
         client.newDeployResourceCommand()
                 .addProcessModel(communicationAgentModel, COMMUNICATION_AGENT_RECEIVE_FILE)
