@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_09w5b7d" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
   <bpmn:process id="customer-communication-agent" isExecutable="true">
-    <bpmn:documentation>communicationContext.channel = "emailAddress"</bpmn:documentation>
     <bpmn:startEvent id="Event_0aolqb7" name="Customer communication received">
       <bpmn:extensionElements>
         <zeebe:ioMapping>
@@ -36,6 +35,7 @@
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="5" />
           <zeebe:header key="elementTemplateId" value="io.camunda.connectors.agenticai.aiagent.jobworker.v1" />
+          <zeebe:header key="errorExpression" value="=if error != null then&#10;  if contains([&#10;    &#34;FAILED_TO_PARSE_RESPONSE_CONTENT&#34;,&#10;    &#34;MAXIMUM_NUMBER_OF_MODEL_CALLS_REACHED&#34;,&#10;    &#34;NO_USER_MESSAGE_CONTENT&#34;,&#10;    &#34;TOOL_CALL_RESULTS_ON_EMPTY_CONTEXT&#34;,&#10;    &#34;AD_HOC_SUB_PROCESS_XML_FETCH_ERROR&#34;,&#10;    &#34;AD_HOC_SUB_PROCESS_NOT_FOUND&#34;,&#10;    &#34;AD_HOC_TOOL_DEFINITION_INVALID&#34;&#10;  ], error.code) then&#10;    bpmnError(error.code, &#34;AI Agent failed with a documented error code&#34;, { reason: error.code, error: error })&#10;  else if error.message != null and contains(error.message, &#34;Status Code: 400&#34;) then&#10;    bpmnError(&#34;MODEL_CALL_FAILED&#34;, &#34;Model call failed with status code 400 in message&#34;, { reason: &#34;Status code 400&#34;, error: error })&#10;  else&#10;    bpmnError(&#34;MODEL_CALL_FAILED&#34;, &#34;Generic Error&#34;, { reason: if error.code != null then error.code else &#34;Unknown&#34;, error: error })&#10;else&#10;  null" />
           <zeebe:header key="retryBackoff" value="PT0S" />
         </zeebe:taskHeaders>
         <zeebe:adHoc outputCollection="toolCallResults" outputElement="={&#10;  id: toolCall._meta.id,&#10;  name: toolCall._meta.name,&#10;  content: toolCallResult&#10;}" />
@@ -49,7 +49,7 @@
           <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
           <zeebe:ioMapping>
             <zeebe:input source="businessAgentNotify" target="messageName" />
-            <zeebe:input source="=supportCase.communicationContext.emailAddress" target="correlationKey" />
+            <zeebe:input source="=supportCase.correlationKey" target="correlationKey" />
             <zeebe:input source="={&#10;  &#34;communicationResult&#34;: {&#10;    status: &#34;success&#34;,&#10;    originalText: fromAi(toolCall.customerMessageInFull),&#10;    text: fromAi(toolCall.customerIntent)&#10;  }&#10;}" target="variables" />
             <zeebe:input source="publish" target="correlationType.type" />
             <zeebe:input source="PT60S" target="correlationType.timeToLive" />
@@ -112,7 +112,7 @@
           <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
           <zeebe:ioMapping>
             <zeebe:input source="businessAgentStart" target="messageName" />
-            <zeebe:input source="=supportCase.communicationContext.emailAddress" target="correlationKey" />
+            <zeebe:input source="=supportCase.correlationKey" target="correlationKey" />
             <zeebe:input source="={&#10;  &#34;supportCase&#34;: supportCase,&#10;  &#34;customer&#34;: customer,&#10;  &#34;request&#34;: fromAi(toolCall.customerDesireToPassToTheAgent)&#10;}" target="variables" />
             <zeebe:input source="publish" target="correlationType.type" />
             <zeebe:input source="PT60S" target="correlationType.timeToLive" />
@@ -148,42 +148,55 @@
       <bpmn:outgoing>Flow_1l12a5g</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1l12a5g" sourceRef="Event_0alat2x" targetRef="SubProcess_CommunicationAgent" />
+    <bpmn:boundaryEvent id="Event_0wsc4dj" attachedToRef="SubProcess_CommunicationAgent">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=error" target="error" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_0upid0u</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_130oaht" />
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="Event_1nryd5n" name="Error">
+      <bpmn:incoming>Flow_0upid0u</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0upid0u" sourceRef="Event_0wsc4dj" targetRef="Event_1nryd5n" />
   </bpmn:process>
   <bpmn:message id="Message_07i0alk" name="chat">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=x" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:error id="Error_07xvk80" name="ERROR_CHAT" errorCode="ERROR_CHAT" />
   <bpmn:message id="Message_0775ttq" name="io.camunda.chat.message.8814bbef-fba9-41fb-a59c-dcdcf5e44afe">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=communicationContext.conversationId" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:message id="Message_1lwucfp" name="io.camunda.chat.message.2afef382-db76-4151-a6a3-079b58f0205f">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=communicationContext.conversationId" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:message id="Message_3qs5cs3" name="WhatsApp2">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=communicationContext.mobilePhone" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:message id="Message_1r1v4qd" name="WhatsApp2" />
   <bpmn:message id="Message_2obe48c" name="CustomerCommunicationReceived">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=supportCase.communicationContext.emailAddress" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:message id="Message_29lh69a" name="CustomerCommunicationRequired">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=supportCase.communicationContext.emailAddress" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmn:message id="Message_0tibq0q" name="AgentFinished">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=supportCase.communicationContext.emailAddress" />
+      <zeebe:subscription correlationKey="=supportCase.correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -192,6 +205,12 @@
         <dc:Bounds x="172" y="322" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="153" y="368" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1nryd5n_di" bpmnElement="Event_1nryd5n">
+        <dc:Bounds x="1072" y="662" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1078" y="705" width="25" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0vgvidi" bpmnElement="SubProcess_CommunicationAgent" isExpanded="true">
@@ -269,6 +288,9 @@
           <dc:Bounds x="1090" y="555" width="40" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0wsc4dj_di" bpmnElement="Event_0wsc4dj">
+        <dc:Bounds x="982" y="582" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0bgr4oc_di" bpmnElement="Flow_0bgr4oc">
         <di:waypoint x="208" y="340" />
         <di:waypoint x="410" y="340" />
@@ -284,6 +306,11 @@
       <bpmndi:BPMNEdge id="Flow_1l12a5g_di" bpmnElement="Flow_1l12a5g">
         <di:waypoint x="288" y="210" />
         <di:waypoint x="410" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0upid0u_di" bpmnElement="Flow_0upid0u">
+        <di:waypoint x="1000" y="618" />
+        <di:waypoint x="1000" y="680" />
+        <di:waypoint x="1072" y="680" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

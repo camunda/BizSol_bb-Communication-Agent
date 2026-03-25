@@ -1,8 +1,6 @@
 package io.camunda.bizsol.bb.comm_agent;
 
 import static io.camunda.bizsol.bb.comm_agent.util.BpmnFile.Replace.replace;
-import static io.camunda.bizsol.bb.comm_agent.util.ToolCallAssert.assertThatToolCalls;
-import static io.camunda.bizsol.bb.comm_agent.util.ToolCallAssert.parameterSatisfying;
 import static io.camunda.process.test.api.CamundaAssert.assertThatProcessInstance;
 import static io.camunda.process.test.api.CamundaAssert.setAssertionTimeout;
 import static io.camunda.process.test.api.assertions.ProcessInstanceSelectors.byProcessId;
@@ -13,6 +11,7 @@ import io.camunda.bizsol.bb.comm_agent.models.EmailCommunicationContext;
 import io.camunda.bizsol.bb.comm_agent.models.SupportCase;
 import io.camunda.bizsol.bb.comm_agent.util.BpmnFile;
 import io.camunda.client.CamundaClient;
+import io.camunda.client.api.search.response.ElementInstance;
 import io.camunda.process.test.api.CamundaProcessTestContext;
 import io.camunda.process.test.api.CamundaSpringProcessTest;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
@@ -22,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,13 +49,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @CamundaSpringProcessTest
 @Testcontainers
 public class CommunicationAgentIT {
-    private static final String OPEN_AI_API_BASEURL = "https://api.openai.com";
-    private static final String OPEN_AI_API_ENDPOINT = OPEN_AI_API_BASEURL + "/v1/";
-    private static final String OPEN_AI_API_KEY = "<secret>";
-    private static final String LLM_MODEL = "gpt-5-mini-2025-08-07";
     private static final String COMMUNICATION_AGENT_RECEIVE_FILE =
             "camunda-artifacts/communication-agent.bpmn";
-    private static final Duration ASSERTION_TIMEOUT = Duration.ofSeconds(120);
+    private static final Duration ASSERTION_TIMEOUT = Duration.ofSeconds(45);
+    private static final int LOG_PREVIEW_LENGTH = 160;
 
     // --------------Process and Element Ids ----------------
     private static final String PROCESS_DEFINITION_ID = "customer-communication-agent";
@@ -64,11 +61,14 @@ public class CommunicationAgentIT {
     private static final String MESSAGE_CUSTOMER_TOOL_ELEMENT_ID = "Tool_MessageCustomer";
     private static final String START_BUSINESS_AGENT_TOOL_ELEMENT_ID = "Tool_StartBusinessAgent";
     private static final String WAIT_TOOL_ELEMENT_ID = "Tool_WAIT";
+    private static final String ERROR_END_EVENT_ID = "Event_1nryd5n";
+    private static final String ERROR_VARIABLE = "error";
 
     // -------------- Messages -------------------
     private static final String START_MESSAGE_NAME = "CustomerCommunicationReceived";
     private static final String COMMUNICATION_REQUIRED_MESSAGE_NAME =
             "CustomerCommunicationRequired";
+    private static final String START_BUSINESS_AGENT_MESSAGE_NAME = "businessAgentStart";
     private static final String NOTIFY_BUSINESS_AGENT_MESSAGE_NAME = "businessAgentNotify";
 
     // ------------- Variables ------------------
@@ -77,7 +77,7 @@ public class CommunicationAgentIT {
 
     // ------------- Strings ---------------------
     private static final String EXPECTED_CUSTOMER_DESIRE =
-            "Customer needs assistance and would like support with their requirements.";
+            "Customer needs assistance with his invoice. Request more details.";
     private static final String EXPECTED_MESSAGE_TEXT =
             "I've connected you with our specialist team who will assist with your needs";
     private static final String CUSTOMER_MESSAGE_SUBJECT = "Invoicing issue";
@@ -85,7 +85,7 @@ public class CommunicationAgentIT {
     private static final String FOLLOW_UP_CUSTOMER_MESSAGE =
             "I was charged twice for invoice INV-123 and need help fixing it.";
     private static final String EXPECTED_FOLLOW_UP_CUSTOMER_INTENT =
-            "Customer needs support with a duplicate charge on invoice INV-123.";
+            "Duplicate charge on invoice INV-123.";
     private static final String ACKNOWLEDGEMENT_CUSTOMER_MESSAGE =
             "Thanks, that makes sense. Please continue handling the case.";
     private static final String EXPECTED_ACKNOWLEDGEMENT_CUSTOMER_INTENT =
@@ -163,19 +163,26 @@ public class CommunicationAgentIT {
     @Test
     @DisplayName("A new incoming message should be passed to the business agent")
     void incomingMessageShouldBePassedToBusinessAgent() {
+        // given
+        final String correlationKey = UUID.randomUUID().toString();
+
         // when
-        publishCustomerCommunicationReceived(SUPPORT_CASE, EMAIL_ADDRESS);
+        publishCustomerCommunicationReceived(SUPPORT_CASE.withCorrelationKey(correlationKey));
 
         // then
         assertCommunicationAgentIsWaiting();
-        assertBusinessAgentToolCallContainsRelevantCustomerDesire();
+        assertBusinessAgentToolCallContainsRelevantCustomerDesire(correlationKey);
     }
 
     @Test
     @DisplayName("When a business agent requires communication, the right tool is triggered")
-    void businessProcessRequiresCommunication() throws InterruptedException {
+    void businessProcessRequiresCommunication() {
+        // given
+        final String correlationKey = UUID.randomUUID().toString();
+
         // when
-        publishCustomerCommunicationReceived(SUPPORT_CASE, EMAIL_ADDRESS);
+        publishCustomerCommunicationReceived(
+                SUPPORT_CASE.withCorrelationKey(correlationKey).withCorrelationKey(correlationKey));
         assertCommunicationAgentIsWaiting();
 
         // then
@@ -197,7 +204,8 @@ public class CommunicationAgentIT {
                         }
                         """
                                 .stripIndent()
-                                .formatted(EXPECTED_MESSAGE_TEXT)));
+                                .formatted(EXPECTED_MESSAGE_TEXT)),
+                correlationKey);
 
         // then
         assertThatProcessInstance(byProcessId(PROCESS_DEFINITION_ID))
@@ -209,10 +217,9 @@ public class CommunicationAgentIT {
                         "communicationContent",
                         JsonNode.class,
                         communicationContent -> {
-                            String text = communicationContent.get("text").asText();
-                            assertThat(text).isNotEmpty();
-                            log.info("CommunicationContent is: " + text);
-                            // assertCustomerMessageText(text);
+                            assertRelevanceMatches(
+                                    communicationContent.get("text").asText(),
+                                    EXPECTED_MESSAGE_TEXT);
                         });
     }
 
@@ -221,33 +228,88 @@ public class CommunicationAgentIT {
             "A new message that correlates to an open conversation leats to a notification of the business agent")
     void newCommunicationShouldNotifyBusinessAgent() {
         // given
-        publishCustomerCommunicationReceived(SUPPORT_CASE, EMAIL_ADDRESS);
+        final String correlationKey = UUID.randomUUID().toString();
+        publishCustomerCommunicationReceived(SUPPORT_CASE.withCorrelationKey(correlationKey));
         assertCommunicationAgentIsWaiting();
 
         // when
         publishCustomerCommunicationReceived(
-                SUPPORT_CASE.withRequest(FOLLOW_UP_CUSTOMER_MESSAGE), EMAIL_ADDRESS);
+                SUPPORT_CASE
+                        .withRequest(FOLLOW_UP_CUSTOMER_MESSAGE)
+                        .withCorrelationKey(correlationKey));
 
         // then
         assertCommunicationAgentIsWaiting();
         assertBusinessAgentWasNotifiedAboutNewCommunication(
-                INITIAL_CUSTOMER_MESSAGE, EXPECTED_FOLLOW_UP_CUSTOMER_INTENT);
+                FOLLOW_UP_CUSTOMER_MESSAGE, EXPECTED_FOLLOW_UP_CUSTOMER_INTENT, correlationKey);
     }
 
-    private void publishCommunicationRequiredMessage(Map<String, Object> communicationContent) {
+    @Test
+    @DisplayName(
+            "A new message that does not correlates to an open conversation creates a new process instance")
+    void unrelatedCommunicationShouldCreateNewProcess() {
+        // given
+        final String correlationKey = UUID.randomUUID().toString();
+        publishCustomerCommunicationReceived(SUPPORT_CASE.withCorrelationKey(correlationKey));
+        assertCommunicationAgentIsWaiting();
+
+        // when
+        publishCustomerCommunicationReceived(
+                SUPPORT_CASE
+                        .withRequest(FOLLOW_UP_CUSTOMER_MESSAGE)
+                        .withCorrelationKey("UNRELATED-CORRELATION_KEY"));
+
+        // then
+
+    }
+
+    private List<ElementInstance> getElementInstances() {
+        return client.newElementInstanceSearchRequest()
+                .filter(e -> e.processDefinitionId(PROCESS_DEFINITION_ID))
+                .send()
+                .join()
+                .items();
+    }
+
+    @Test
+    @DisplayName("An exception should be caught and saved to error variable")
+    void emptyCustomerMessageShouldRaiseDocumentedBpmnError() {
+        // given
+        final String correlationKey = UUID.randomUUID().toString();
+
+        // when
+        publishCustomerCommunicationReceived(
+                SUPPORT_CASE.withRequest(null).withCorrelationKey(correlationKey));
+
+        // then
+        assertThatProcessInstance(byProcessId(PROCESS_DEFINITION_ID))
+                .isCompleted()
+                .hasCompletedElements(ERROR_END_EVENT_ID)
+                .hasVariableSatisfies(
+                        ERROR_VARIABLE,
+                        JsonNode.class,
+                        error -> {
+                            assertThat(error.get("type").asText())
+                                    .isEqualTo(
+                                            "io.camunda.connector.api.error.ConnectorInputException");
+                            assertThat(error.get("message").asText()).isNotBlank();
+                        });
+    }
+
+    private void publishCommunicationRequiredMessage(
+            Map<String, Object> communicationContent, String correlationKey) {
         client.newPublishMessageCommand()
                 .messageName(CommunicationAgentIT.COMMUNICATION_REQUIRED_MESSAGE_NAME)
-                .correlationKey(CommunicationAgentIT.EMAIL_ADDRESS)
+                .correlationKey(correlationKey)
                 .variables(communicationContent)
                 .send()
                 .join();
     }
 
-    private void publishCustomerCommunicationReceived(
-            SupportCase supportCase, String correlationKey) {
+    private void publishCustomerCommunicationReceived(SupportCase supportCase) {
         client.newPublishMessageCommand()
                 .messageName(START_MESSAGE_NAME)
-                .correlationKey(correlationKey)
+                .correlationKey(supportCase.correlationKey())
                 .variables(Map.of("supportCase", supportCase))
                 .send()
                 .join();
@@ -260,24 +322,39 @@ public class CommunicationAgentIT {
                 .hasActiveElements(WAIT_TOOL_ELEMENT_ID);
     }
 
-    private void assertBusinessAgentToolCallContainsRelevantCustomerDesire() {
+    private void assertBusinessAgentToolCallContainsRelevantCustomerDesire(
+            String expectedCorrelationKey) {
         assertThatProcessInstance(byProcessId(PROCESS_DEFINITION_ID))
+                .isActive()
+                .hasCompletedElements(START_BUSINESS_AGENT_TOOL_ELEMENT_ID)
                 .hasLocalVariableSatisfies(
-                        COMMUNICATION_AGENT_SUB_PROCESS,
-                        AGENT_CONTEXT_VARIABLE,
+                        START_BUSINESS_AGENT_TOOL_ELEMENT_ID,
+                        "messageName",
+                        String.class,
+                        messageName ->
+                                assertThat(messageName)
+                                        .isEqualTo(START_BUSINESS_AGENT_MESSAGE_NAME))
+                .hasLocalVariableSatisfies(
+                        START_BUSINESS_AGENT_TOOL_ELEMENT_ID,
+                        "correlationKey",
+                        String.class,
+                        correlationKey ->
+                                assertThat(correlationKey).isEqualTo(expectedCorrelationKey))
+                .hasLocalVariableSatisfies(
+                        START_BUSINESS_AGENT_TOOL_ELEMENT_ID,
+                        "variables",
                         JsonNode.class,
-                        agentContext ->
-                                assertThatToolCalls(agentContext)
-                                        .containsToolCallNamed(START_BUSINESS_AGENT_TOOL_ELEMENT_ID)
-                                        .hasToolCallWithParameterSatisfying(
-                                                START_BUSINESS_AGENT_TOOL_ELEMENT_ID,
-                                                parameterSatisfying(
-                                                        CUSTOMER_DESIRE_PARAMETER,
-                                                        this::assertCustomerDesireIsRelevant)));
+                        variables -> {
+                            assertRelevanceMatches(
+                                    variables.get(CUSTOMER_DESIRE_PARAMETER).asText(),
+                                    EXPECTED_CUSTOMER_DESIRE);
+                        });
     }
 
     private void assertBusinessAgentWasNotifiedAboutNewCommunication(
-            String expectedOriginalMessage, String expectedCustomerIntent) {
+            String expectedOriginalMessage,
+            String expectedCustomerIntent,
+            String expectedCorrelationKey) {
         assertThatProcessInstance(byProcessId(PROCESS_DEFINITION_ID))
                 .isActive()
                 .hasCompletedElements(NOTIFY_BUSINESS_AGENT_ELEMENT_ID)
@@ -292,7 +369,8 @@ public class CommunicationAgentIT {
                         NOTIFY_BUSINESS_AGENT_ELEMENT_ID,
                         "correlationKey",
                         String.class,
-                        correlationKey -> assertThat(correlationKey).isEqualTo(EMAIL_ADDRESS))
+                        correlationKey ->
+                                assertThat(correlationKey).isEqualTo(expectedCorrelationKey))
                 .hasLocalVariableSatisfies(
                         NOTIFY_BUSINESS_AGENT_ELEMENT_ID,
                         "variables",
@@ -300,63 +378,56 @@ public class CommunicationAgentIT {
                         variables -> {
                             JsonNode communicationResult = variables.get("communicationResult");
                             assertThat(communicationResult).isNotNull();
-                            log.info(
+                            log.debug(
                                     "communicationResult: {}",
                                     communicationResult.toPrettyString());
                             assertThat(communicationResult.get("status").asText())
                                     .isEqualTo("success");
-                            //                            assertCustomerMessageWasForwarded(
-                            //
-                            // communicationResult.get("originalText").asText(),
-                            //                                    expectedOriginalMessage);
-                            assertCustomerIntentIsRelevant(
+                            assertThat(communicationResult.get("originalText").asText())
+                                    .isEqualTo(expectedOriginalMessage);
+                            assertRelevanceMatches(
                                     communicationResult.get("text").asText(),
                                     expectedCustomerIntent);
                         });
     }
 
-    private void assertCustomerDesireIsRelevant(JsonNode customerDesire) {
-        String actualCustomerDesire = customerDesire.asText();
-        assertThat(actualCustomerDesire).isNotBlank();
-
-        EvaluationRequest request =
-                new EvaluationRequest(EXPECTED_CUSTOMER_DESIRE, List.of(), actualCustomerDesire);
-        EvaluationResponse response = evaluator.evaluate(request);
-        assertThat(response.isPass()).describedAs(response.getFeedback()).isTrue();
-    }
-
-    private void assertCustomerMessageText(String actualCustomerDesire) {
-        assertThat(actualCustomerDesire).isNotBlank();
-
-        EvaluationRequest request =
-                new EvaluationRequest(EXPECTED_MESSAGE_TEXT, List.of(), actualCustomerDesire);
-        EvaluationResponse response = evaluator.evaluate(request);
-        assertThat(response.isPass()).describedAs(response.getFeedback()).isTrue();
-    }
-
-    private void assertCustomerMessageWasForwarded(
-            String actualCustomerMessage, String expectedCustomerMessage) {
-        assertThat(actualCustomerMessage).isNotBlank();
-
-        EvaluationRequest request =
-                new EvaluationRequest(expectedCustomerMessage, List.of(), actualCustomerMessage);
-        EvaluationResponse response = evaluator.evaluate(request);
-        assertThat(response.isPass()).describedAs(response.getFeedback()).isTrue();
-    }
-
-    private void assertCustomerIntentIsRelevant(
+    private void assertRelevanceMatches(
             String actualCustomerIntent, String expectedCustomerIntent) {
         assertThat(actualCustomerIntent).isNotBlank();
+
+        log.debug(
+                "Evaluating relevance. expected='{}', actual='{}'",
+                previewForLog(expectedCustomerIntent),
+                previewForLog(actualCustomerIntent));
 
         EvaluationRequest request =
                 new EvaluationRequest(expectedCustomerIntent, List.of(), actualCustomerIntent);
         EvaluationResponse response = evaluator.evaluate(request);
+
+        if (response.isPass()) {
+            log.info("Relevance evaluation passed. score={}", response.getScore());
+        } else {
+            log.warn(
+                    "Relevance evaluation failed. score={}, feedback='{}', expected='{}', actual='{}'",
+                    response.getScore(),
+                    previewForLog(response.getFeedback()),
+                    previewForLog(expectedCustomerIntent),
+                    previewForLog(actualCustomerIntent));
+        }
+
         assertThat(response.isPass()).describedAs(response.getFeedback()).isTrue();
+    }
+
+    private String previewForLog(String value) {
+        String normalized = value.replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= LOG_PREVIEW_LENGTH) {
+            return normalized;
+        }
+        return normalized.substring(0, LOG_PREVIEW_LENGTH - 3) + "...";
     }
 
     @TestConfiguration
     static class TestEvaluatorConfiguration {
-
         @Bean
         Evaluator evaluator(ChatModel chatModel) {
             return new RelevancyEvaluator(ChatClient.builder(chatModel));

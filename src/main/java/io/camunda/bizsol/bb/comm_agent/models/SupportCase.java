@@ -12,6 +12,7 @@ import lombok.extern.jackson.Jacksonized;
 public record SupportCase(
         String subject,
         String request,
+        String correlationKey,
         CommunicationContext communicationContext,
         List<Attachment> attachments,
         LocalDateTime receivedDateTime) {}
