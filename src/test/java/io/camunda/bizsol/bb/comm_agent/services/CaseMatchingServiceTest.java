@@ -2,11 +2,7 @@ package io.camunda.bizsol.bb.comm_agent.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.camunda.bizsol.bb.comm_agent.models.CommunicationContext;
-import io.camunda.bizsol.bb.comm_agent.models.CustomCommunicationContext;
-import io.camunda.bizsol.bb.comm_agent.models.EmailCommunicationContext;
-import io.camunda.bizsol.bb.comm_agent.models.PhoneCommunicationContext;
-import io.camunda.bizsol.bb.comm_agent.models.SupportCase;
+import io.camunda.bizsol.bb.comm_agent.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
