@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.util.ResourceUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
@@ -114,7 +113,7 @@ public class CommunicationAgentIT {
     void deployProcess() throws FileNotFoundException {
         BpmnModelInstance communicationAgentModel =
                 BpmnFile.replace(
-                        ResourceUtils.getFile(COMMUNICATION_AGENT_RECEIVE_FILE),
+                        COMMUNICATION_AGENT_RECEIVE_FILE,
                         // Add none start event
                         replace(
                                 """
