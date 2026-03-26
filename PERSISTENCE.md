@@ -38,8 +38,8 @@ The parent directory is created automatically on startup if it does not exist.
 | Variable        | Type            | Required for                    | Description                                                    |
 |-----------------|-----------------|---------------------------------|----------------------------------------------------------------|
 | `operation`     | String          | all                             | `CREATE`, `READ`, `UPDATE`, `DELETE`, `LIST` (case-insensitive) |
-| `duckDbId`      | String          | CREATE / READ / UPDATE / DELETE | Primary key of the record                                      |
-| `duckDbPayload` | String or Object | CREATE / UPDATE                | JSON string **or** a structured FEEL context — both accepted   |
+| `id`      | String          | CREATE / READ / UPDATE / DELETE | Primary key of the record                                      |
+| `payload` | String or Object | CREATE / UPDATE                | JSON string **or** a structured FEEL context — both accepted   |
 
 ### Output variables
 
@@ -66,7 +66,7 @@ for record in duckDbResult return record.payload.tier
 
 ### CREATE
 
-Inserts a new record. Fails with an incident if `duckDbId` already exists (primary key violation).
+Inserts a new record. Fails with an incident if `id` already exists (primary key violation).
 
 **Returns:** `duckDbResult` — the inserted record.
 
@@ -74,13 +74,13 @@ Inserts a new record. Fails with an incident if `duckDbId` already exists (prima
 <zeebe:taskDefinition type="DuckDb" />
 <zeebe:ioMapping>
   <zeebe:input source="=&quot;CREATE&quot;"         target="operation" />
-  <zeebe:input source="=contactId"                  target="duckDbId" />
-  <zeebe:input source="=contactPayload"             target="duckDbPayload" />
+  <zeebe:input source="=contactId"                  target="id" />
+  <zeebe:input source="=contactPayload"             target="payload" />
 </zeebe:ioMapping>
 <zeebe:output source="=duckDbResult"                target="savedContact" />
 ```
 
-`duckDbPayload` accepts a FEEL context directly — no manual JSON serialisation needed:
+`payload` accepts a FEEL context directly — no manual JSON serialisation needed:
 
 ```feel
 = {name: "Acme Corp", email: "support@acme.com", tier: "premium"}
@@ -99,7 +99,7 @@ Example `duckDbResult` value in the process after the task:
 
 ### READ
 
-Fetches one record by `duckDbId`.
+Fetches one record by `id`.
 
 **Returns:** `duckDbResult` — the record, or `null` if the id does not exist.
 
@@ -107,7 +107,7 @@ Fetches one record by `duckDbId`.
 <zeebe:taskDefinition type="DuckDb" />
 <zeebe:ioMapping>
   <zeebe:input source="=&quot;READ&quot;"           target="operation" />
-  <zeebe:input source="=contactId"                  target="duckDbId" />
+  <zeebe:input source="=contactId"                  target="id" />
 </zeebe:ioMapping>
 <zeebe:output source="=duckDbResult"                target="contactRecord" />
 ```
@@ -122,7 +122,7 @@ if contactRecord = null then "unknown" else contactRecord.payload.name
 
 ### UPDATE
 
-Overwrites the payload of an existing record. Fails with an incident if `duckDbId` is not found.
+Overwrites the payload of an existing record. Fails with an incident if `id` is not found.
 
 **Returns:** `duckDbResult` — the record with the new payload.
 
@@ -130,8 +130,8 @@ Overwrites the payload of an existing record. Fails with an incident if `duckDbI
 <zeebe:taskDefinition type="DuckDb" />
 <zeebe:ioMapping>
   <zeebe:input source="=&quot;UPDATE&quot;"         target="operation" />
-  <zeebe:input source="=contactId"                  target="duckDbId" />
-  <zeebe:input source="=updatedPayload"             target="duckDbPayload" />
+  <zeebe:input source="=contactId"                  target="id" />
+  <zeebe:input source="=updatedPayload"             target="payload" />
 </zeebe:ioMapping>
 <zeebe:output source="=duckDbResult"                target="updatedContact" />
 ```
@@ -140,7 +140,7 @@ Overwrites the payload of an existing record. Fails with an incident if `duckDbI
 
 ### DELETE
 
-Removes a record by `duckDbId`. Silently succeeds if the id does not exist.
+Removes a record by `id`. Silently succeeds if the id does not exist.
 
 **Returns:** `duckDbResult = null`, `duckDbResults = null`.
 
@@ -148,7 +148,7 @@ Removes a record by `duckDbId`. Silently succeeds if the id does not exist.
 <zeebe:taskDefinition type="DuckDb" />
 <zeebe:ioMapping>
   <zeebe:input source="=&quot;DELETE&quot;"         target="operation" />
-  <zeebe:input source="=contactId"                  target="duckDbId" />
+  <zeebe:input source="=contactId"                  target="id" />
 </zeebe:ioMapping>
 ```
 
@@ -158,7 +158,7 @@ No output mapping needed. The task produces no usable result.
 
 ### LIST
 
-Returns every row in the table. `duckDbId` and `duckDbPayload` are ignored.
+Returns every row in the table. `id` and `payload` are ignored.
 
 **Returns:** `duckDbResult` — a list of all records (empty list `[]` when table is empty).
 

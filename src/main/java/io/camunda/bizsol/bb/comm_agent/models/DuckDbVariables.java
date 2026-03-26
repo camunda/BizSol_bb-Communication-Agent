@@ -1,3 +1,3 @@
 package io.camunda.bizsol.bb.comm_agent.models;
 
-public record DuckDbVariables(String operation, String duckDbId, Object duckDbPayload) {}
+public record DuckDbVariables(String operation, String id, Object payload) {}

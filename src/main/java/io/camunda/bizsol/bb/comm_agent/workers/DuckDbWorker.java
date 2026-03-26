@@ -26,14 +26,14 @@ public class DuckDbWorker {
             case "CREATE" ->
                     new DuckDbResult(
                             duckDbService.create(
-                                    variables.duckDbId(), toJson(variables.duckDbPayload())));
-            case "READ" -> new DuckDbResult(duckDbService.read(variables.duckDbId()).orElse(null));
+                                    variables.id(), toJson(variables.payload())));
+            case "READ" -> new DuckDbResult(duckDbService.read(variables.id()).orElse(null));
             case "UPDATE" ->
                     new DuckDbResult(
                             duckDbService.update(
-                                    variables.duckDbId(), toJson(variables.duckDbPayload())));
+                                    variables.id(), toJson(variables.payload())));
             case "DELETE" -> {
-                duckDbService.delete(variables.duckDbId());
+                duckDbService.delete(variables.id());
                 yield new DuckDbResult(null);
             }
             case "LIST" -> new DuckDbResult(duckDbService.list());
@@ -49,7 +49,7 @@ public class DuckDbWorker {
         try {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Cannot serialize duckDbPayload to JSON", e);
+            throw new IllegalArgumentException("Cannot serialize payload to JSON", e);
         }
     }
 }
