@@ -10,8 +10,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.camunda.bizsol.bb.comm_agent.models.EmailCommunicationContext;
 import io.camunda.bizsol.bb.comm_agent.models.SupportCase;
 import io.camunda.bizsol.bb.comm_agent.util.BpmnFile;
+import io.camunda.bizsol.bb.comm_agent.util.SemanticMatchingEvaluator;
 import io.camunda.client.CamundaClient;
 import io.camunda.client.api.search.response.ElementInstance;
+import io.camunda.client.api.search.response.ProcessInstance;
+import io.camunda.client.api.search.response.SearchResponse;
 import io.camunda.process.test.api.CamundaProcessTestContext;
 import io.camunda.process.test.api.CamundaSpringProcessTest;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
@@ -23,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.CollectionAssert;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.evaluation.RelevancyEvaluator;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.evaluation.EvaluationRequest;
 import org.springframework.ai.evaluation.EvaluationResponse;
@@ -72,13 +76,12 @@ public class CommunicationAgentIT {
     private static final String NOTIFY_BUSINESS_AGENT_MESSAGE_NAME = "businessAgentNotify";
 
     // ------------- Variables ------------------
-    private static final String AGENT_CONTEXT_VARIABLE = "agentContext";
-    private static final String CUSTOMER_DESIRE_PARAMETER = "customerDesireToPassToTheAgent";
+    private static final String CUSTOMER_REQUEST_PARAMETER = "request";
 
     // ------------- Strings ---------------------
     private static final String EXPECTED_CUSTOMER_DESIRE =
             "Customer needs assistance with his invoice. Request more details.";
-    private static final String EXPECTED_MESSAGE_TEXT =
+    private static final String BUSINESS_AGENT_MESSAGE_TO_CUSTOMER =
             "I've connected you with our specialist team who will assist with your needs";
     private static final String CUSTOMER_MESSAGE_SUBJECT = "Invoicing issue";
     private static final String INITIAL_CUSTOMER_MESSAGE = "Need help with my invoice.";
@@ -86,10 +89,6 @@ public class CommunicationAgentIT {
             "I was charged twice for invoice INV-123 and need help fixing it.";
     private static final String EXPECTED_FOLLOW_UP_CUSTOMER_INTENT =
             "Duplicate charge on invoice INV-123.";
-    private static final String ACKNOWLEDGEMENT_CUSTOMER_MESSAGE =
-            "Thanks, that makes sense. Please continue handling the case.";
-    private static final String EXPECTED_ACKNOWLEDGEMENT_CUSTOMER_INTENT =
-            "Customer acknowledges the update and asks the team to continue with the case.";
 
     // ------------ Test Fixtures ----------------
 
@@ -175,7 +174,7 @@ public class CommunicationAgentIT {
     }
 
     @Test
-    @DisplayName("When a business agent requires communication, the right tool is triggered")
+    @DisplayName("When a business agent requires communication, the outbound tool is triggered")
     void businessProcessRequiresCommunication() {
         // given
         final String correlationKey = UUID.randomUUID().toString();
@@ -204,7 +203,7 @@ public class CommunicationAgentIT {
                         }
                         """
                                 .stripIndent()
-                                .formatted(EXPECTED_MESSAGE_TEXT)),
+                                .formatted(BUSINESS_AGENT_MESSAGE_TO_CUSTOMER)),
                 correlationKey);
 
         // then
@@ -219,7 +218,7 @@ public class CommunicationAgentIT {
                         communicationContent -> {
                             assertRelevanceMatches(
                                     communicationContent.get("text").asText(),
-                                    EXPECTED_MESSAGE_TEXT);
+                                    BUSINESS_AGENT_MESSAGE_TO_CUSTOMER);
                         });
     }
 
@@ -260,7 +259,19 @@ public class CommunicationAgentIT {
                         .withCorrelationKey("UNRELATED-CORRELATION_KEY"));
 
         // then
-
+        Awaitility.await()
+                .untilAsserted(
+                        () -> {
+                            SearchResponse<ProcessInstance> results =
+                                    client.newProcessInstanceSearchRequest()
+                                            .filter(
+                                                    f ->
+                                                            f.processDefinitionId(
+                                                                    PROCESS_DEFINITION_ID))
+                                            .send()
+                                            .join();
+                            CollectionAssert.assertThatCollection(results.items()).hasSize(2);
+                        });
     }
 
     private List<ElementInstance> getElementInstances() {
@@ -346,7 +357,7 @@ public class CommunicationAgentIT {
                         JsonNode.class,
                         variables -> {
                             assertRelevanceMatches(
-                                    variables.get(CUSTOMER_DESIRE_PARAMETER).asText(),
+                                    variables.get(CUSTOMER_REQUEST_PARAMETER).asText(),
                                     EXPECTED_CUSTOMER_DESIRE);
                         });
     }
@@ -401,11 +412,11 @@ public class CommunicationAgentIT {
                 previewForLog(actualCustomerIntent));
 
         EvaluationRequest request =
-                new EvaluationRequest(expectedCustomerIntent, List.of(), actualCustomerIntent);
+                new EvaluationRequest(expectedCustomerIntent, actualCustomerIntent);
         EvaluationResponse response = evaluator.evaluate(request);
 
         if (response.isPass()) {
-            log.info("Relevance evaluation passed. score={}", response.getScore());
+            log.info("Relevance evaluation passed.");
         } else {
             log.warn(
                     "Relevance evaluation failed. score={}, feedback='{}', expected='{}', actual='{}'",
@@ -430,7 +441,7 @@ public class CommunicationAgentIT {
     static class TestEvaluatorConfiguration {
         @Bean
         Evaluator evaluator(ChatModel chatModel) {
-            return new RelevancyEvaluator(ChatClient.builder(chatModel));
+            return new SemanticMatchingEvaluator(ChatClient.builder(chatModel), 0.7F);
         }
     }
 }
