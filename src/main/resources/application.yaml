@@ -2,8 +2,11 @@ spring:
   application:
     name: BizSol Communication Agent
 
+duckdb:
+  file-path: ./data/comm-agent.db
+
 server:
-  port: 8080
+  port: 9090
 
 management:
   endpoints:

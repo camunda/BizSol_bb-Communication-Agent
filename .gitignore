@@ -1,5 +1,7 @@
 .DS_Store
-
+# persistence artifacts
+data
+# compile
 target/
 # Compiled class file
 *.class

@@ -153,6 +153,17 @@
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-ant</artifactId>
         </dependency>
+
+        <!-- DuckDB JDBC -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>1.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
