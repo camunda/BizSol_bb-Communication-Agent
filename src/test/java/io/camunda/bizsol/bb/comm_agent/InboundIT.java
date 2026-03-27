@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -87,7 +86,7 @@ public class InboundIT {
         // setup
         BpmnModelInstance messageReceiveModel =
                 BpmnFile.replace(
-                        ResourceUtils.getFile(MESSAGE_RECEIVE_FILE),
+                        MESSAGE_RECEIVE_FILE,
                         // Add none start event
                         replace(
                                 "</bpmn:process>",
