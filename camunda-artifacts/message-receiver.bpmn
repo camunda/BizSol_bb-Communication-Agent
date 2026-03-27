@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0w4mjzu" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0w4mjzu" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
   <bpmn:process id="message-receiver" isExecutable="true">
     <bpmn:extensionElements>
       <zeebe:versionTag value="1.0" />
@@ -35,7 +35,6 @@
     <bpmn:exclusiveGateway id="Gateway_0zc209k">
       <bpmn:incoming>Flow_0pemwmw</bpmn:incoming>
       <bpmn:incoming>Flow_17yswsl</bpmn:incoming>
-      <bpmn:incoming>Flow_1f517si</bpmn:incoming>
       <bpmn:outgoing>Flow_0eu3bw7</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:startEvent id="StartEvent_WebHook" name="Webhook" zeebe:modelerTemplate="io.camunda.connectors.webhook.WebhookConnectorStartMessage.v1" zeebe:modelerTemplateVersion="13" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyBpZD0naWNvbicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTgnIGhlaWdodD0nMTgnIHZpZXdCb3g9JzAgMCAzMiAzMic+CiAgPGRlZnM+CiAgICA8c3R5bGU+LmNscy0xIHsgZmlsbDogbm9uZTsgfTwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoCiAgICBkPSdNMjQsMjZhMywzLDAsMSwwLTIuODE2NC00SDEzdjFhNSw1LDAsMSwxLTUtNVYxNmE3LDcsMCwxLDAsNi45Mjg3LDhoNi4yNTQ5QTIuOTkxNCwyLjk5MTQsMCwwLDAsMjQsMjZaJy8+CiAgPHBhdGgKICAgIGQ9J00yNCwxNmE3LjAyNCw3LjAyNCwwLDAsMC0yLjU3LjQ4NzNsLTMuMTY1Ni01LjUzOTVhMy4wNDY5LDMuMDQ2OSwwLDEsMC0xLjczMjYuOTk4NWw0LjExODksNy4yMDg1Ljg2ODYtLjQ5NzZhNS4wMDA2LDUuMDAwNiwwLDEsMS0xLjg1MSw2Ljg0MThMMTcuOTM3LDI2LjUwMUE3LjAwMDUsNy4wMDA1LDAsMSwwLDI0LDE2WicvPgogIDxwYXRoCiAgICBkPSdNOC41MzIsMjAuMDUzN2EzLjAzLDMuMDMsMCwxLDAsMS43MzI2Ljk5ODVDMTEuNzQsMTguNDcsMTMuODYsMTQuNzYwNywxMy44OSwxNC43MDhsLjQ5NzYtLjg2ODItLjg2NzctLjQ5N2E1LDUsMCwxLDEsNi44MTItMS44NDM4bDEuNzMxNSwxLjAwMmE3LjAwMDgsNy4wMDA4LDAsMSwwLTEwLjM0NjIsMi4wMzU2Yy0uNDU3Ljc0MjctMS4xMDIxLDEuODcxNi0yLjA3MzcsMy41NzI4WicvPgogIDxyZWN0IGlkPSdfVHJhbnNwYXJlbnRfUmVjdGFuZ2xlXycgZGF0YS1uYW1lPScmbHQ7VHJhbnNwYXJlbnQgUmVjdGFuZ2xlJmd0OycgY2xhc3M9J2Nscy0xJwogICAgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJy8+Cjwvc3ZnPg==">
@@ -62,7 +61,8 @@
         <zeebe:calledElement processId="case-matching" propagateAllChildVariables="false" propagateAllParentVariables="false" />
         <zeebe:ioMapping>
           <zeebe:input source="=supportCase" target="supportCase" />
-          <zeebe:output source="=correlationKey" target="correlationKey" />
+          <zeebe:input source="=true" target="use_feel" />
+          <zeebe:output source="=correlationKey" target="supportCase.correlationKey" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0eu3bw7</bpmn:incoming>
@@ -73,7 +73,7 @@
         <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
         <zeebe:ioMapping>
           <zeebe:input source="CustomerCommunicationReceived" target="messageName" />
-          <zeebe:input source="=correlationKey" target="correlationKey" />
+          <zeebe:input source="=supportCase.correlationKey" target="correlationKey" />
           <zeebe:input source="={&#34;supportCase&#34;: supportCase }" target="variables" />
           <zeebe:input source="publish" target="correlationType.type" />
         </zeebe:ioMapping>
@@ -117,9 +117,6 @@
       <bpmndi:BPMNShape id="Event_10n1558_di" bpmnElement="Event_SendCustomerCommunicationReceived">
         <dc:Bounds x="922" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1jp0lym_di" bpmnElement="Event_1jp0lym">
-        <dc:Bounds x="322" y="432" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0eu3bw7_di" bpmnElement="Flow_0eu3bw7">
         <di:waypoint x="515" y="120" />
         <di:waypoint x="660" y="120" />
@@ -136,11 +133,6 @@
       <bpmndi:BPMNEdge id="Flow_1azfio8_di" bpmnElement="Flow_1azfio8">
         <di:waypoint x="760" y="120" />
         <di:waypoint x="922" y="120" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1f517si_di" bpmnElement="Flow_1f517si">
-        <di:waypoint x="358" y="450" />
-        <di:waypoint x="490" y="450" />
-        <di:waypoint x="490" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -34,6 +34,7 @@ public class ReceiveMessageTest {
     private static final String MESSAGE_RECEIVE_FILE = "camunda-artifacts/message-receiver.bpmn";
     private static final String SEND_MESSAGE_CONNECTOR_ELEMENT_ID =
             "Event_SendCustomerCommunicationReceived";
+    private final String CORRELATION_KEY = "correlationKeyValue";
 
     @Autowired private CamundaClient client;
     @Autowired private CamundaProcessTestContext processTestContext;
@@ -50,6 +51,7 @@ public class ReceiveMessageTest {
                         .request("Hi!")
                         .receivedDateTime(LocalDateTime.of(2026, 2, 17, 12, 0))
                         .attachments(Collections.emptyList())
+                        .correlationKey(CORRELATION_KEY)
                         .communicationContext(
                                 EmailCommunicationContext.builder()
                                         .emailAddress("example@camunda.com")
@@ -77,9 +79,8 @@ public class ReceiveMessageTest {
                 .join();
 
         // and: mock case-matching sub-process
-        final String correlationKeyValue = "correlationKeyValue";
         processTestContext.mockChildProcess(
-                "case-matching", Map.of("correlationKey", correlationKeyValue));
+                "case-matching", Map.of("correlationKey", CORRELATION_KEY));
 
         // when
         final ProcessInstanceEvent processInstance =
@@ -119,7 +120,6 @@ public class ReceiveMessageTest {
                         SEND_MESSAGE_CONNECTOR_ELEMENT_ID,
                         "correlationKey",
                         String.class,
-                        correlationKey ->
-                                assertThat(correlationKey).isEqualTo(correlationKeyValue));
+                        correlationKey -> assertThat(correlationKey).isEqualTo(CORRELATION_KEY));
     }
 }

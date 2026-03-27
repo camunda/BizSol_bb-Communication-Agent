@@ -26,6 +26,7 @@
     <bpmn:participant id="Participant_0l50e36" name="Communication Agent" />
     <bpmn:messageFlow id="Flow_1kx71cp" sourceRef="Activity_019gubg" targetRef="Participant_0l50e36" />
     <bpmn:messageFlow id="Flow_0d3onpl" sourceRef="Activity_0jb8hom" targetRef="Participant_0l50e36" />
+    <bpmn:messageFlow id="Flow_1ffkvn0" sourceRef="Participant_0l50e36" targetRef="event_wait_for_feedback" />
   </bpmn:collaboration>
   <bpmn:process id="e2e_communication_01" isExecutable="true">
     <bpmn:documentation />
@@ -36,6 +37,7 @@
         <bpmn:flowNodeRef>Event_0g7xivr</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_019gubg</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0jb8hom</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>event_wait_for_feedback</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="StartEvent_1" name="START">
@@ -60,9 +62,9 @@
           <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
           <zeebe:input source="{{secrets.E2E_SMTP_USERNAME}}" target="data.smtpAction.from" />
           <zeebe:input source="{{secrets.INBOUND_IMAP_USERNAME}}" target="data.smtpAction.to" />
-          <zeebe:input source="Eigentümerwechsel – Vertragsnummer WG-2026-123456" target="data.smtpAction.subject" />
+          <zeebe:input source="Eigentümerwechsel – Vertragsnummer V123456789" target="data.smtpAction.subject" />
           <zeebe:input source="PLAIN" target="data.smtpAction.contentType" />
-          <zeebe:input source="Sehr geehrte Damen und Herren,&#10; &#10;hiermit teile ich Ihnen mit, dass ich mein Einfamilienhaus in der Hauptstraße 43, 30159 Hannover zum 01.04.2026.&#10; &#10;Ich bitte Sie, den bestehenden Wohngebäudeversicherungsvertrag (Vertragsnr. WG-2026-123456) entsprechend auf die neue Eigentümer umzuschreiben.&#10; &#10;Für Rückfragen stehe ich Ihnen gerne zur Verfügung.&#10; &#10;Mit freundlichen Grüßen&#10;John Doe" target="data.smtpAction.body" />
+          <zeebe:input source="Sehr geehrte Damen und Herren,&#10; &#10;hiermit teile ich Ihnen mit, dass ich mein Einfamilienhaus in der Hauptstraße 43, 30159 Hannover zum 01.04.2026.&#10; &#10;Ich bitte Sie, den bestehenden Wohngebäudeversicherungsvertrag (Vertragsnr. V123456789) entsprechend auf die neue Eigentümer umzuschreiben.&#10; &#10;Für Rückfragen stehe ich Ihnen gerne zur Verfügung.&#10; &#10;Mit freundlichen Grüßen&#10;John Doe" target="data.smtpAction.body" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="3" />
@@ -88,7 +90,7 @@
           <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
           <zeebe:input source="{{secrets.E2E_SMTP_USERNAME}}" target="data.smtpAction.from" />
           <zeebe:input source="{{secrets.E2E_SMTP_USERNAME}}" target="data.smtpAction.to" />
-          <zeebe:input source="RE: Eigentümerwechsel – Vertragsnummer WG-2026-123456" target="data.smtpAction.subject" />
+          <zeebe:input source="RE: Eigentümerwechsel – Vertragsnummer V123456789" target="data.smtpAction.subject" />
           <zeebe:input source="PLAIN" target="data.smtpAction.contentType" />
           <zeebe:input source="Der Käufer ist Jane Doe, Nebenstraße 6 in 20146 Hamburg" target="data.smtpAction.body" />
         </zeebe:ioMapping>
@@ -98,12 +100,43 @@
           <zeebe:header key="retryBackoff" value="PT0S" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0q5z114</bpmn:incoming>
+      <bpmn:incoming>Flow_1vq2738</bpmn:incoming>
       <bpmn:outgoing>Flow_0kdqqxt</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0kdqqxt" sourceRef="Activity_0jb8hom" targetRef="Event_0g7xivr" />
-    <bpmn:sequenceFlow id="Flow_0q5z114" sourceRef="Activity_019gubg" targetRef="Activity_0jb8hom" />
+    <bpmn:sequenceFlow id="Flow_0q5z114" sourceRef="Activity_019gubg" targetRef="event_wait_for_feedback" />
+    <bpmn:sequenceFlow id="Flow_1vq2738" sourceRef="event_wait_for_feedback" targetRef="Activity_0jb8hom" />
+    <bpmn:intermediateCatchEvent id="event_wait_for_feedback" name="Rückfrage" zeebe:modelerTemplate="io.camunda.connectors.inbound.EmailIntermediate.v1" zeebe:modelerTemplateVersion="2" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <bpmn:extensionElements>
+        <zeebe:properties>
+          <zeebe:property name="inbound.type" value="io.camunda:connector-email-inbound:1" />
+          <zeebe:property name="authentication.type" value="simple" />
+          <zeebe:property name="authentication.username" value="{{secrets.E2E_SMTP_USERNAME}}" />
+          <zeebe:property name="authentication.password" value="{{secrets.E2E_SMTP_PASSWORD}}" />
+          <zeebe:property name="data.imapConfig.imapHost" value="{{secrets.INBOUND_IMAP_SERVER}}" />
+          <zeebe:property name="data.imapConfig.imapPort" value="{{secrets.INBOUND_IMAP_PORT}}" />
+          <zeebe:property name="data.imapConfig.imapCryptographicProtocol" value="NONE" />
+          <zeebe:property name="data.pollingWaitTime" value="PT5S" />
+          <zeebe:property name="data.pollingConfigDiscriminator" value="unseenPollingConfig" />
+          <zeebe:property name="data.pollingConfig.handlingStrategy" value="READ" />
+          <zeebe:property name="consumeUnmatchedEvents" value="true" />
+          <zeebe:property name="correlationKeyExpression" value="=&#34;true&#34;" />
+          <zeebe:property name="deduplicationModeManualFlag" value="false" />
+          <zeebe:property name="deduplicationMode" value="AUTO" />
+          <zeebe:property name="resultVariable" />
+          <zeebe:property name="resultExpression" />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0q5z114</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vq2738</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_02wfr19" messageRef="Message_0gqjtl2" />
+    </bpmn:intermediateCatchEvent>
   </bpmn:process>
+  <bpmn:message id="Message_0gqjtl2" name="a15b848f-5868-4ff0-99ff-4e183ed7aa15" zeebe:modelerTemplate="io.camunda.connectors.inbound.EmailIntermediate.v1">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=&#34;true&#34;" />
+    </bpmn:extensionElements>
+  </bpmn:message>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TEST_E2E">
       <bpmndi:BPMNShape id="Participant_0qi09p3_di" bpmnElement="Participant_0qi09p3" isHorizontal="true">
@@ -138,6 +171,12 @@
         <dc:Bounds x="730" y="110" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_07qokw8_di" bpmnElement="event_wait_for_feedback">
+        <dc:Bounds x="512" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="505" y="102" width="51" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1waftpa_di" bpmnElement="Flow_1waftpa">
         <di:waypoint x="209" y="150" />
         <di:waypoint x="270" y="150" />
@@ -148,6 +187,10 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0q5z114_di" bpmnElement="Flow_0q5z114">
         <di:waypoint x="370" y="150" />
+        <di:waypoint x="512" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vq2738_di" bpmnElement="Flow_1vq2738">
+        <di:waypoint x="548" y="150" />
         <di:waypoint x="730" y="150" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Participant_0l50e36_di" bpmnElement="Participant_0l50e36" isHorizontal="true">
@@ -161,6 +204,10 @@
       <bpmndi:BPMNEdge id="Flow_0d3onpl_di" bpmnElement="Flow_0d3onpl">
         <di:waypoint x="780" y="190" />
         <di:waypoint x="780" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ffkvn0_di" bpmnElement="Flow_1ffkvn0">
+        <di:waypoint x="530" y="550" />
+        <di:waypoint x="530" y="168" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
