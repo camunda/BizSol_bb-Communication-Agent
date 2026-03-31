@@ -54,7 +54,7 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0idtsrp_di" bpmnElement="Event_0idtsrp">
-        <dc:Bounds x="532" y="102" width="36" height="36" />
+        <dc:Bounds x="512" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0x84exm_di" bpmnElement="Flow_0x84exm">
         <di:waypoint x="168" y="120" />
@@ -66,7 +66,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00qsvo8_di" bpmnElement="Flow_00qsvo8">
         <di:waypoint x="438" y="120" />
-        <di:waypoint x="532" y="120" />
+        <di:waypoint x="512" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
