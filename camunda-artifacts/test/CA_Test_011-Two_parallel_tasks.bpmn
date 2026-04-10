@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1b851hl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+  <bpmn:process id="CA_Test_011-Two_parallel_tasks" isExecutable="true">
+    <bpmn:startEvent id="Event_0hicwkr">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=[]" target="payload" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_10j2sye</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="Event_0idtsrp">
+      <bpmn:incoming>Flow_1byj41h</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="Activity_1dofs1q" name="Translate to French" zeebe:modelerTemplate="io.camunda.connectors.message.sendtask.v1" zeebe:modelerTemplateVersion="0" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZwogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHdpZHRoPSIyMDAwIgogICBoZWlnaHQ9IjIwMDAiCiAgIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiCiAgIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4KICA8cGF0aAogICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwIgogICAgIGQ9Im0gMCwyODQgMjAwMCwwIC0xMDAwLDU1NCB6Ii8+CiAgPHBhdGgKICAgICBzdHlsZT0iY29sb3I6IzAwMDAwMCIKICAgICBkPSJtIDAsNDUyIDEwMDAsNTQ4IDEwMDAsLTU0OCAwLDEwOTYgLTIwMDAsMCB6Ii8+Cjwvc3ZnPgo=">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="message-customer-to-intake" target="messageName" />
+          <zeebe:input source="={&#10;  testChannel: &#34;email&#34;,&#10;  testFrom: &#34;jane-doe@email.com&#34;,&#10;  testSubject: &#34;Inquiry about math problem&#34;,&#10;  testMessage: &#34;Please translate all message to french: &#34;&#10;}" target="variables" />
+          <zeebe:input source="publish" target="correlationType.type" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="0" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.message.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0khmnyl</bpmn:incoming>
+      <bpmn:outgoing>Flow_19cxe97</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="Event_0ddjeog" name="Wait for reply">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=&#34;&#34;" target="MakePayloadVisible" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_051rdsf</bpmn:incoming>
+      <bpmn:outgoing>Flow_1byj41h</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1pjpvbk" messageRef="Message_0pppk31" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="Activity_1tx623t" name="What is 2+2?" zeebe:modelerTemplate="io.camunda.connectors.message.sendtask.v1" zeebe:modelerTemplateVersion="0" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZwogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHdpZHRoPSIyMDAwIgogICBoZWlnaHQ9IjIwMDAiCiAgIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiCiAgIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4KICA8cGF0aAogICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwIgogICAgIGQ9Im0gMCwyODQgMjAwMCwwIC0xMDAwLDU1NCB6Ii8+CiAgPHBhdGgKICAgICBzdHlsZT0iY29sb3I6IzAwMDAwMCIKICAgICBkPSJtIDAsNDUyIDEwMDAsNTQ4IDEwMDAsLTU0OCAwLDEwOTYgLTIwMDAsMCB6Ii8+Cjwvc3ZnPgo=">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="io.camunda:sendMessage:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="message-customer-to-intake" target="messageName" />
+          <zeebe:input source="={&#10;  testChannel: &#34;email&#34;,&#10;  testFrom: &#34;jane-doe@email.com&#34;,&#10;  testSubject: &#34;Inquiry about math problem&#34;,&#10;  testMessage: &#34;What is 2+2?&#34;&#10;}" target="variables" />
+          <zeebe:input source="correlate" target="correlationType.type" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="0" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.message.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0fj0q0g</bpmn:incoming>
+      <bpmn:outgoing>Flow_0s7vs2t</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="Flow_1byj41h" sourceRef="Event_0ddjeog" targetRef="Event_0idtsrp" />
+    <bpmn:sequenceFlow id="Flow_10j2sye" sourceRef="Event_0hicwkr" targetRef="Gateway_03pgfmp" />
+    <bpmn:sequenceFlow id="Flow_0fj0q0g" sourceRef="Gateway_03pgfmp" targetRef="Activity_1tx623t" />
+    <bpmn:parallelGateway id="Gateway_03pgfmp">
+      <bpmn:incoming>Flow_10j2sye</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fj0q0g</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0khmnyl</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0khmnyl" sourceRef="Gateway_03pgfmp" targetRef="Activity_1dofs1q" />
+    <bpmn:parallelGateway id="Gateway_09s8kos">
+      <bpmn:incoming>Flow_0s7vs2t</bpmn:incoming>
+      <bpmn:incoming>Flow_19cxe97</bpmn:incoming>
+      <bpmn:outgoing>Flow_051rdsf</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0s7vs2t" sourceRef="Activity_1tx623t" targetRef="Gateway_09s8kos" />
+    <bpmn:sequenceFlow id="Flow_19cxe97" sourceRef="Activity_1dofs1q" targetRef="Gateway_09s8kos" />
+    <bpmn:sequenceFlow id="Flow_051rdsf" sourceRef="Gateway_09s8kos" targetRef="Event_0ddjeog" />
+  </bpmn:process>
+  <bpmn:message id="Message_0pppk31" name="message-communication-agent-to-customer-email">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=&#34;jane-doe@email.com&#34;" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CA_Test_011-Two_parallel_tasks">
+      <bpmndi:BPMNShape id="Event_0hicwkr_di" bpmnElement="Event_0hicwkr">
+        <dc:Bounds x="132" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0idtsrp_di" bpmnElement="Event_0idtsrp">
+        <dc:Bounds x="982" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1kuxeev" bpmnElement="Activity_1dofs1q">
+        <dc:Bounds x="330" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0l2h6cl" bpmnElement="Event_0ddjeog">
+        <dc:Bounds x="652" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="638" y="145" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_10pa8ux_di" bpmnElement="Activity_1tx623t">
+        <dc:Bounds x="330" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1us496t_di" bpmnElement="Gateway_03pgfmp">
+        <dc:Bounds x="215" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1sjuxlh" bpmnElement="Gateway_09s8kos">
+        <dc:Bounds x="525" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1byj41h_di" bpmnElement="Flow_1byj41h">
+        <di:waypoint x="688" y="120" />
+        <di:waypoint x="982" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10j2sye_di" bpmnElement="Flow_10j2sye">
+        <di:waypoint x="168" y="120" />
+        <di:waypoint x="215" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fj0q0g_di" bpmnElement="Flow_0fj0q0g">
+        <di:waypoint x="265" y="120" />
+        <di:waypoint x="330" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0khmnyl_di" bpmnElement="Flow_0khmnyl">
+        <di:waypoint x="240" y="145" />
+        <di:waypoint x="240" y="240" />
+        <di:waypoint x="330" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0s7vs2t_di" bpmnElement="Flow_0s7vs2t">
+        <di:waypoint x="430" y="120" />
+        <di:waypoint x="525" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19cxe97_di" bpmnElement="Flow_19cxe97">
+        <di:waypoint x="430" y="240" />
+        <di:waypoint x="550" y="240" />
+        <di:waypoint x="550" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_051rdsf_di" bpmnElement="Flow_051rdsf">
+        <di:waypoint x="575" y="120" />
+        <di:waypoint x="652" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
