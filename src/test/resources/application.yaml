@@ -1,0 +1,19 @@
+spring:
+  ai:
+    openai-sdk:
+      api-key: ${GITHUB_TOKEN:}
+      git-hub-models: true # uses https://models.github.ai/inference automatically
+      chat:
+        options:
+          model: openai/gpt-4.1-mini
+          temperature: 1.0
+
+camunda:
+  process-test:
+    camunda-docker-image-version: 8.8.8
+    connectors-enabled: true
+    connectors-docker-image-version: 8.8.8
+    connectors-secrets:
+      LLM_MODEL: openai/gpt-4.1-mini
+      LLM_API_ENDPOINT: https://models.github.ai/inference
+      LLM_API_KEY: ${GITHUB_TOKEN:}
