@@ -12,7 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+            "camunda.process-test.connectors-enabled=true",
+            "camunda.process-test.connectors-secrets.AWS_ACCESS_KEY=${AWS_ACCESS_KEY:}",
+            "camunda.process-test.connectors-secrets.AWS_SECRET_KEY=${AWS_SECRET_KEY:}",
+            "camunda.connector.secret-provider.environment.prefix="
+        })
 @CamundaSpringProcessTest
 public class Test1ProcessTest {
 
