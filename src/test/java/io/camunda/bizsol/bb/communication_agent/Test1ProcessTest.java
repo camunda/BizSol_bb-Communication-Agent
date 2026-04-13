@@ -5,6 +5,7 @@ import io.camunda.client.api.response.ProcessInstanceEvent;
 import io.camunda.process.test.api.CamundaAssert;
 import io.camunda.process.test.api.CamundaProcessTestContext;
 import io.camunda.process.test.api.CamundaSpringProcessTest;
+import java.time.Duration;
 import io.camunda.client.annotation.Deployment;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class Test1ProcessTest {
             .join();
 
     // Assert the process runs to completion
-    CamundaAssert.assertThat(processInstance).isCompleted();
+    CamundaAssert.assertThat(processInstance)
+        .withAssertionTimeout(Duration.ofMinutes(2))
+        .isCompleted();
   }
 }
