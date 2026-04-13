@@ -44,7 +44,7 @@ public class Test1ProcessTest {
 
     // Assert the process runs to completion
     CamundaAssert.assertThat(processInstance)
-        .withAssertionTimeout(Duration.ofMinutes(2))
+        .withAssertionTimeout(Duration.ofMinutes(1))
         .isCompleted();
   }
 }
