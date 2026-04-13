@@ -149,6 +149,10 @@ The communication agent also wraps all outgoing communication to keep it consist
     </bpmn:textAnnotation>
     <bpmn:association id="Association_1a7z278" associationDirection="None" sourceRef="Activity_CommunicationAgent" targetRef="TextAnnotation_1vbhn1y" />
     <bpmn:association id="Association_1pksk1j" associationDirection="None" sourceRef="Activity_ToolForwardMessageToCalculatorAgent" targetRef="TextAnnotation_1dtxdbk" />
+    <bpmn:textAnnotation id="TextAnnotation_1id1jzh">
+      <bpmn:text>TODO: Notify customer after timeout</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1yacse6" associationDirection="None" sourceRef="Event_Timeout" targetRef="TextAnnotation_1id1jzh" />
   </bpmn:process>
   <bpmn:message id="Message_3mdd6nm" name="message-intake-to-communication-agent">
     <bpmn:extensionElements>
@@ -250,10 +254,14 @@ The communication agent also wraps all outgoing communication to keep it consist
           <dc:Bounds x="874" y="435" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1pksk1j_di" bpmnElement="Association_1pksk1j">
-        <di:waypoint x="380" y="540" />
-        <di:waypoint x="380" y="580" />
+      <bpmndi:BPMNEdge id="Association_1yacse6_di" bpmnElement="Association_1yacse6">
+        <di:waypoint x="787" y="645" />
+        <di:waypoint x="910" y="681" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_1dtxdbk_di" bpmnElement="TextAnnotation_1dtxdbk">
+        <dc:Bounds x="330" y="580" width="270" height="90" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1vbhn1y_di" bpmnElement="TextAnnotation_1vbhn1y">
         <dc:Bounds x="515" y="80" width="289.99709639953545" height="155.63298490127758" />
         <bpmndi:BPMNLabel />
@@ -270,8 +278,12 @@ The communication agent also wraps all outgoing communication to keep it consist
         <di:waypoint x="565" y="270" />
         <di:waypoint x="565" y="236" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_1dtxdbk_di" bpmnElement="TextAnnotation_1dtxdbk">
-        <dc:Bounds x="330" y="580" width="270" height="90" />
+      <bpmndi:BPMNEdge id="Association_1pksk1j_di" bpmnElement="Association_1pksk1j">
+        <di:waypoint x="380" y="540" />
+        <di:waypoint x="380" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_1id1jzh_di" bpmnElement="TextAnnotation_1id1jzh">
+        <dc:Bounds x="910" y="680" width="100" height="55" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>

@@ -27,6 +27,7 @@
           <zeebe:input source="=customerContext.contactEmail" target="correlationKey" />
           <zeebe:input source="=outboundMessageContext" target="variables" />
           <zeebe:input source="publish" target="correlationType.type" />
+          <zeebe:input source="PT0S" target="correlationType.timeToLive" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="0" />
@@ -62,6 +63,7 @@
           <zeebe:input source="=customerContext.contactChat" target="correlationKey" />
           <zeebe:input source="=outboundMessageContext" target="variables" />
           <zeebe:input source="publish" target="correlationType.type" />
+          <zeebe:input source="PT0S" target="correlationType.timeToLive" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="0" />
@@ -82,6 +84,7 @@
           <zeebe:input source="=customerContext.contactSms" target="correlationKey" />
           <zeebe:input source="=outboundMessageContext" target="variables" />
           <zeebe:input source="publish" target="correlationType.type" />
+          <zeebe:input source="PT0S" target="correlationType.timeToLive" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="0" />
@@ -136,6 +139,12 @@ Implement your own fallback hierarchy, e.g., sending an email in case an SMS cou
           <dc:Bounds x="151" y="555" width="79" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0k57jir_di" bpmnElement="Event_MessageSent">
+        <dc:Bounds x="752" y="502" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="728" y="545" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0rxcgp4_di" bpmnElement="Activity_ReplyToCustomerViaEmail">
         <dc:Bounds x="520" y="570" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -156,12 +165,6 @@ Implement your own fallback hierarchy, e.g., sending an email in case an SMS cou
       <bpmndi:BPMNShape id="BPMNShape_0rcumx1" bpmnElement="Activity_ReplyToCustomerViaSms">
         <dc:Bounds x="450" y="400" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0k57jir_di" bpmnElement="Event_MessageSent">
-        <dc:Bounds x="752" y="502" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="728" y="545" width="84" height="27" />
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1j52yb2" bpmnElement="Event_MessageNotSent">
         <dc:Bounds x="752" y="672" width="36" height="36" />
