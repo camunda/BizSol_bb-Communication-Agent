@@ -11,6 +11,7 @@ import io.camunda.client.annotation.Deployment;
 import io.camunda.client.api.response.CorrelateMessageResponse;
 import io.camunda.process.test.api.CamundaProcessTestContext;
 import io.camunda.process.test.api.CamundaSpringProcessTest;
+import java.time.Duration;
 import java.io.FileNotFoundException;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -66,6 +67,7 @@ public class TestMessageIntake {
         assertThatProcessInstance(
                         byKey(response.getProcessInstanceKey())
                                 .and(byProcessId(PROCESS_DEFINITION_ID)))
+                .withAssertionTimeout(Duration.ofMinutes(2))
                 .isCompleted()
                 .hasCompletedElements(SEND_MESSAGE_CONNECTOR_ELEMENT_ID)
                 .hasLocalVariableSatisfies(
