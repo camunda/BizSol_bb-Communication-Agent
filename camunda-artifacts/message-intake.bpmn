@@ -95,7 +95,7 @@ not(is blank(messageContext.from))</bpmn:conditionExpression>
           <zeebe:input source="message-intake-to-communication-agent" target="messageName" />
           <zeebe:input source="=customerContext.id" target="correlationKey" />
           <zeebe:input source="={&#10;  customerContext: customerContext,&#10;  messageContext: messageContext&#10;}" target="variables" />
-          <zeebe:input source="correlate" target="correlationType.type" />
+          <zeebe:input source="publish" target="correlationType.type" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="elementTemplateVersion" value="0" />

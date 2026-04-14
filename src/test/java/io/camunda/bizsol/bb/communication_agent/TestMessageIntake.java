@@ -45,8 +45,8 @@ public class TestMessageIntake {
     @Autowired private CamundaProcessTestContext processTestContext;
 
     @Test
-    @DisplayName("Should send BPMN message with support case and correlationKey")
-    void shouldSendBpmnMessageWithSupportCaseVariablesAndCorrelationKey()
+    @DisplayName("Should send BPMN message with full customer context")
+    void shouldSendBpmnMessageWithFullCustomerContext()
             throws FileNotFoundException {
 
         // when
@@ -81,7 +81,7 @@ public class TestMessageIntake {
                         JsonNode.class,
                         variables -> {
                             assertThat(variables.at("/customerContext/id").asText())
-                                    .isEqualTo("id_customer_1");
+                                    .isEqualTo(CORRELATION_KEY);
                             assertThat(variables.at("/customerContext/contactEmail").asText())
                                     .isEqualTo("jane-doe@email.com");
                             assertThat(variables.at("/customerContext/contactSms").asText())
