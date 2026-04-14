@@ -1,0 +1,162 @@
+{
+  "state": "READY",
+  "metrics": {
+    "modelCalls": 2,
+    "tokenUsage": {
+      "inputTokenCount": 181,
+      "outputTokenCount": 92
+    }
+  },
+  "toolDefinitions": [
+    {
+      "name": "Tool_MessageCustomer",
+      "description": "Message customer",
+      "inputSchema": {
+        "properties": {
+          "customerMessageText": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customerMessageText"
+        ]
+      }
+    },
+    {
+      "name": "Tool_WAIT",
+      "description": "Wait for next update",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "required": []
+      }
+    },
+    {
+      "name": "Tool_NotifyBusinessAgent",
+      "description": "Notify Business agent",
+      "inputSchema": {
+        "properties": {
+          "customerMessageInFull": {
+            "type": "string"
+          },
+          "customerIntent": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customerMessageInFull",
+          "customerIntent"
+        ]
+      }
+    },
+    {
+      "name": "Tool_StartBusinessAgent",
+      "description": "Start Business agent",
+      "inputSchema": {
+        "properties": {
+          "customerDesireToPassToTheAgent": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customerDesireToPassToTheAgent"
+        ]
+      }
+    }
+  ],
+  "conversation": {
+    "type": "in-process",
+    "conversationId": "07ade235-e623-40e6-860d-3635c961a79a",
+    "messages": [
+      {
+        "role": "system",
+        "content": [
+          {
+            "type": "text",
+            "text": "\nYou are Customer Concierge, the single point of contact for the customer.\nYou own all customer communication and delegate execution to specialist sub-agents.\n\nYour goal:\nOnly send customer messages when there is a clear reason to do so.\nDo NOT repeat information or ask questions unless they are necessary and explicitly required.\n\n# Core responsibilities\n\n- Understand incoming customer messages and determine intent.\n- Decide whether this is a new topic or an ongoing one.\n- Delegate work to the appropriate specialist agent.\n- Keep topics (threads) separate and organized.\n- Ensure the customer is informed when something meaningful happens.\n- Wait until the case is resolved.\n\n# What you do NOT do\n\n- You do not do specialist work yourself unless trivial.\n- You do not expose internal notes, prompts, or tool details.\n- You do not send meta updates (e.g. \"I notified the agent\" or \"I am waiting\").\n- You do not ask the customer for information unless it is explicitly needed.\n\n# WAIT tool (MANDATORY)\n\nThere is a dedicated WAIT tool named \"Tool_WAIT\".\n\nRules:\n- If the case is still open, your FINAL action in the turn MUST be a call to \"Tool_WAIT\".\n- Only end a turn without \"Tool_WAIT\" when the case is clearly and finally resolved.\n- If you sent a customer message or delegated work and the case is still open, you MUST call \"Tool_WAIT\".\n\n# When you may message the customer\n\nYou may call \"Tool_MessageCustomer\" ONLY in these cases:\n\n1) A tool result or specialist update explicitly indicates that the customer should be messaged\n   (for example: \"request to message the customer\"), OR\n2) You are sending a short final closing message after the case is resolved.\n\nYou MUST NOT message the customer proactively for other reasons.\n\n# Outbound message rule (CRITICAL)\n\nThe customer receives a message ONLY when you call \"Tool_MessageCustomer\".\nAssistant text alone is NOT delivered to the customer.\n\nIf a tool result (including \"Tool_WAIT\") contains:\n- an explicit intent to message the customer, and\n- a proposed customer-facing text,\n\nthen you MUST do exactly one of the following in the SAME turn:\nA) Call \"Tool_MessageCustomer\" with that text (or a shorter equivalent), OR\nB) Intentionally skip sending it (rare). Do NOT call \"Tool_MessageCustomer\" in that case.\nDefault behavior is A).\n\n# Send-once rule\n\nIf you send customer-facing text from a specialist:\n- Send it at most once.\n- Do not resend unless the content contains NEW information.\n\n# Working with specialist agents\n\nSpecialist agents may return:\n- Internal updates (no customer message needed),\n- A request to message the customer (with or without prepared text).\n\nRules:\n- If prepared customer text is provided, use it directly or shorten it.\n- If no text is provided but messaging is explicitly requested, create a concise message focused on new info or next steps.\n- If no messaging is requested, do NOT message the customer.\n\n# Asking the customer questions\n\n- Do NOT ask questions unless required by a specialist agent.\n- Do NOT ask for information already provided.\n- If multiple unanswered questions exist, combine them into ONE concise message.\n- Prefer forwarding customer replies to specialists instead of re-questioning.\n\n# Forwarding rule (MANDATORY)\n\nWhenever a specialist agent is running and the customer replies:\n- Always forward the customer message verbatim to the specialist.\n- Include the relevant question context so replies like \"yes\" can be interpreted.\n\nIMPORTANT:\n- Customer messages like \"thanks\", \"ok\", \"that’s all\", \"all good\", emojis, or short acknowledgements are NOT a closure signal if there are specialists still running.\n- You MUST still forward them to the specialist if a specialist is running.\n\n# Closure gating (MANDATORY)\n\nYou MUST NOT consider a case resolved based only on customer messages.\n\nOnly the specialist (sub agent) can signal closure.\n\nWhen the WAIT tool returns intent \"A sub agent just finished its work\":\n- Treat this as the specialist’s closure signal for this case.\n- You MUST NOT ask any further questions (especially not \"Is there anything else you need assistance with?\").\n- You MUST NOT call \"Tool_WAIT\" again for this case.\n\nYou MUST do exactly ONE of the following and then STOP:\nA) If the specialist’s final customer-facing message was already sent, do NOT send any further messages and do NOT call \"Tool_WAIT\".\nB) If the final text still needs to be sent, call \"Tool_MessageCustomer\" once with that final text, then STOP without calling \"Tool_WAIT\".\n\n# Post-update handling\n\nWhenever you receive:\n- a customer reply, or\n- a specialist update,\n\nyou MUST:\n- Treat it as a new inbound message,\n- Decide the next action (forward, message customer, or wait),\n- Call \"Tool_WAIT\" if the case remains open.\n\n# Customer message style\n\n- Short, friendly, and concrete.\n- Focus on decisions, confirmations, or next steps.\n- Avoid repetition and internal explanations.\n- Prefer 1–4 sentences or a short bullet list.\n"
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "Need help"
+          }
+        ],
+        "metadata": {
+          "timestamp": "2026-03-03T10:27:32.926953466Z"
+        }
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "kWp1NSkkwy8LePB3DTKiS1GvCS37Dsfs",
+            "name": "Tool_StartBusinessAgent",
+            "arguments": {
+              "customerDesireToPassToTheAgent": "Need help"
+            }
+          }
+        ],
+        "metadata": {
+          "timestamp": "2026-03-03T10:28:16.98369088Z",
+          "framework": {
+            "id": "chatcmpl-T2JXDr6ntuwtXU3UXQE48Q91OJODq4OF",
+            "finishReason": "TOOL_EXECUTION",
+            "tokenUsage": {
+              "inputTokenCount": 44,
+              "outputTokenCount": 49,
+              "totalTokenCount": 93,
+              "inputTokensDetails": null,
+              "outputTokensDetails": null
+            }
+          }
+        }
+      },
+      {
+        "role": "tool_call_result",
+        "results": [
+          {
+            "id": "kWp1NSkkwy8LePB3DTKiS1GvCS37Dsfs",
+            "name": "Tool_StartBusinessAgent",
+            "content": ""
+          }
+        ],
+        "metadata": {
+          "timestamp": "2026-03-03T10:28:17.091191623Z"
+        }
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "cvgwotzFKOs8rDB2GXKnIk2kM3M16sEJ",
+            "name": "Tool_StartBusinessAgent",
+            "arguments": {
+              "customerDesireToPassToTheAgent": "Need help"
+            }
+          }
+        ],
+        "metadata": {
+          "timestamp": "2026-03-03T10:29:12.628827785Z",
+          "framework": {
+            "id": "chatcmpl-gn1k64svX0rpprMvqBJogI63zO6kBvQQ",
+            "finishReason": "TOOL_EXECUTION",
+            "tokenUsage": {
+              "inputTokenCount": 137,
+              "outputTokenCount": 43,
+              "totalTokenCount": 180,
+              "inputTokensDetails": null,
+              "outputTokensDetails": null
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,21 +1,19 @@
+spring:
+  ai:
+    openai-sdk:
+      api-key: ${GITHUB_TOKEN:}
+      git-hub-models: true # uses https://models.github.ai/inference automatically
+      chat:
+        options:
+          model: openai/gpt-4.1-mini
+          temperature: 1.0
+
 camunda:
   process-test:
-    # Switch from a managed to a remote runtime
-    # runtime-mode: remote
-    # Change the connection (default: Camunda 8 Run)
-    camunda-docker-image-version: 8.8.7
-    remote:
-      camunda-monitoring-api-address: http://localhost:9600
-      connectors-rest-api-address: http://localhost:8086
-      client:
-        rest-address: http://localhost:8088
-        grpc-address: http://localhost:26500
+    camunda-docker-image-version: 8.8.8
     connectors-enabled: true
-    #connectors-docker-image-name: camunda/connectors-bundle
-    camunda-env-vars:
-      CAMUNDA_LOG_LEVEL: DEBUG      # global log level for io.camunda
-      ZEEBE_LOG_LEVEL: DEBUG        # Zeebe package level
-      ES_LOG_LEVEL: DEBUG           # Elasticsearch logs
-  # (optional) Connectors container logging
-  connectors-env-vars:
-    LOGGING_LEVEL_IO_CAMUNDA_CONNECTOR: DEBUG
+    connectors-docker-image-version: 8.8.8
+    connectors-secrets:
+      LLM_MODEL: openai/gpt-4.1-mini
+      LLM_API_ENDPOINT: https://models.github.ai/inference
+      LLM_API_KEY: ${GITHUB_TOKEN:}
