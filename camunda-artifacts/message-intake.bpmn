@@ -8,7 +8,7 @@
         </zeebe:ioMapping>
         <zeebe:calledDecision decisionId="customer-database" resultVariable="customerContext" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0kliake</bpmn:incoming>
+      <bpmn:incoming>Flow_06qckin</bpmn:incoming>
       <bpmn:outgoing>Flow_0fbmjga</bpmn:outgoing>
       <bpmn:property id="Property_0wuxgoh" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataInputAssociation_1srhckd">
@@ -106,20 +106,13 @@ not(is blank(messageContext.from))</bpmn:conditionExpression>
       <bpmn:incoming>Flow_0qkfpjz</bpmn:incoming>
       <bpmn:messageEventDefinition id="MessageEventDefinition_023w9db" />
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0kliake" sourceRef="Activity_RunAiFirewall" targetRef="Activity_FindCustomerContext" />
-    <bpmn:endEvent id="Event_MessageBlockedByAiFirewall" name="Message blocked by AI firewall">
+    <bpmn:sequenceFlow id="Flow_0kliake" sourceRef="Activity_RunAiFirewall" targetRef="Gateway_1smypft" />
+    <bpmn:endEvent id="Event_MessageBlockedByAiFirewall" name="AI firewall failed">
       <bpmn:incoming>Flow_0hzpji4</bpmn:incoming>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1o5viv1" errorRef="Error_1qika3r" />
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0hzpji4" sourceRef="Event_EscalationFromAiFirewall" targetRef="Event_MessageBlockedByAiFirewall" />
-    <bpmn:scriptTask id="Activity_RunAiFirewall" name="Run AI firewall">
-      <bpmn:extensionElements>
-        <zeebe:script expression="=&#34;AI firewall executed&#34;" resultVariable="dummy_ai-firewall-result" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_045luqa</bpmn:incoming>
-      <bpmn:outgoing>Flow_0kliake</bpmn:outgoing>
-    </bpmn:scriptTask>
-    <bpmn:boundaryEvent id="Event_EscalationFromAiFirewall" name="AI firewall failed or message blocked" attachedToRef="Activity_RunAiFirewall">
+    <bpmn:boundaryEvent id="Event_EscalationFromAiFirewall" attachedToRef="Activity_RunAiFirewall">
       <bpmn:outgoing>Flow_0hzpji4</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1kq93mb" />
     </bpmn:boundaryEvent>
@@ -147,6 +140,30 @@ not(is blank(messageContext.from))</bpmn:conditionExpression>
     </bpmn:scriptTask>
     <bpmn:sequenceFlow id="Flow_0oehmcv" sourceRef="Event_ChatFromCustomer" targetRef="Activity_ExtractMessageContextFromChat" />
     <bpmn:sequenceFlow id="Flow_0vlyq4h" sourceRef="Activity_ExtractMessageContextFromChat" targetRef="Gateway_MergeIncomingMessages" />
+    <bpmn:scriptTask id="Activity_RunAiFirewall" name="Run AI firewall">
+      <bpmn:extensionElements>
+        <zeebe:script expression="=// Mock firewall logic, replace with call activity or service.&#10;true" resultVariable="internalFirewallExecutionResult" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=messageContext.subject + &#34; &#34; + messageContext.message" target="aiFirewallInputMessage" />
+          <zeebe:output source="=internalFirewallExecutionResult" target="aiFirewallIsMessageSafe" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_045luqa</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kliake</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="Gateway_1smypft" name="Is message safe?" default="Flow_0aubnx9">
+      <bpmn:incoming>Flow_0kliake</bpmn:incoming>
+      <bpmn:outgoing>Flow_06qckin</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0aubnx9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_06qckin" name="Yes" sourceRef="Gateway_1smypft" targetRef="Activity_FindCustomerContext">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=aiFirewallIsMessageSafe</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0aubnx9" name="No" sourceRef="Gateway_1smypft" targetRef="Event_1riqm9y" />
+    <bpmn:endEvent id="Event_1riqm9y" name="Message rejected by AI firewall">
+      <bpmn:incoming>Flow_0aubnx9</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0n6jeiu" errorRef="Error_1pyra58" />
+    </bpmn:endEvent>
     <bpmn:group id="Group_1gexwym" categoryValueRef="CategoryValue_1dr13oj" />
     <bpmn:textAnnotation id="TextAnnotation_1fjxz8m">
       <bpmn:text>Match the incoming message to a unique customer record in your system (the customer context for this message)
@@ -159,9 +176,7 @@ The output must be a unique record identifier for the customer as well as contac
     <bpmn:textAnnotation id="TextAnnotation_1lukjyb">
       <bpmn:text>Secure your system by running all incoming messages against an AI firewall.
 
-Check the Camunda marketplace for a sample building block to swap in as a call activity:
-
-https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
+Check the Camunda marketplace for a sample building block (AI Firewall Agent) to swap in as a call activity.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_10oc60f" associationDirection="None" sourceRef="Activity_RunAiFirewall" targetRef="TextAnnotation_1lukjyb" />
     <bpmn:textAnnotation id="TextAnnotation_0yjr0oy">
@@ -180,24 +195,9 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
   <bpmn:message id="Message_3eaqmdq" name="dummy_email" />
   <bpmn:message id="Message_104tvdo" name="dummy_sms" />
   <bpmn:message id="Message_03nbod2" name="dummy_chat" />
+  <bpmn:error id="Error_1pyra58" name="message-intake-ai-firewall-failed" errorCode="message-intake-ai-firewall-failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="message-intake">
-      <bpmndi:BPMNShape id="Activity_0aqg87u_di" bpmnElement="Activity_FindCustomerContext">
-        <dc:Bounds x="870" y="400" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0dwk5ch_di" bpmnElement="Gateway_CustomerFound" isMarkerVisible="true">
-        <dc:Bounds x="1035" y="415" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1017" y="393" width="85" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0iykrfq_di" bpmnElement="Event_CustomerUnknown">
-        <dc:Bounds x="1112" y="512" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1101" y="556" width="59" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0f5r35l_di" bpmnElement="Gateway_MergeIncomingMessages" isMarkerVisible="true">
         <dc:Bounds x="415" y="415" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -205,12 +205,6 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
         <dc:Bounds x="182" y="492" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="157" y="535" width="87" height="40" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="DataStoreReference_15fm7ad_di" bpmnElement="DataStoreReference_CustomerDatabase">
-        <dc:Bounds x="895" y="295" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="896" y="258" width="48" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1arwgyy_di" bpmnElement="Activity_ExtractMessageContextFromSms">
@@ -235,18 +229,6 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
         <dc:Bounds x="612" y="512" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="588" y="555" width="84" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0lsrotf_di" bpmnElement="Event_PropagateMessageToCommAgent">
-        <dc:Bounds x="1182" y="422" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1163" y="465" width="74" height="53" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1x1r96a" bpmnElement="Event_MessageBlockedByAiFirewall">
-        <dc:Bounds x="832" y="512" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="807" y="555" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1fm1j73_di" bpmnElement="Activity_RunAiFirewall">
@@ -274,53 +256,114 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
         <dc:Bounds x="280" y="330" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0dwk5ch_di" bpmnElement="Gateway_CustomerFound" isMarkerVisible="true">
+        <dc:Bounds x="1156" y="415" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1138" y="393" width="85" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0iykrfq_di" bpmnElement="Event_CustomerUnknown">
+        <dc:Bounds x="1233" y="512" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1222" y="556" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_15fm7ad_di" bpmnElement="DataStoreReference_CustomerDatabase">
+        <dc:Bounds x="1016" y="295" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1017" y="258" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0lsrotf_di" bpmnElement="Event_PropagateMessageToCommAgent">
+        <dc:Bounds x="1303" y="422" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1284" y="465" width="74" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0aqg87u_di" bpmnElement="Activity_FindCustomerContext">
+        <dc:Bounds x="991" y="400" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1smypft_di" bpmnElement="Gateway_1smypft" isMarkerVisible="true">
+        <dc:Bounds x="865" y="415" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="847" y="391" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1x1r96a" bpmnElement="Event_MessageBlockedByAiFirewall">
+        <dc:Bounds x="792" y="512" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="771" y="555" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1mvw6g9_di" bpmnElement="Event_1riqm9y">
+        <dc:Bounds x="932" y="512" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="907" y="555" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0n4u9c3_di" bpmnElement="Association_0n4u9c3">
+        <di:waypoint x="1059" y="400" />
+        <di:waypoint x="1146" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0tn059s_di" bpmnElement="Event_EscalationFromAiFirewall">
+        <dc:Bounds x="732" y="462" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="651" y="490" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0fbmjga_di" bpmnElement="Flow_0fbmjga">
+        <di:waypoint x="1091" y="440" />
+        <di:waypoint x="1156" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02qf9ba_di" bpmnElement="Flow_02qf9ba">
+        <di:waypoint x="1181" y="465" />
+        <di:waypoint x="1181" y="530" />
+        <di:waypoint x="1233" y="530" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1193" y="493" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qkfpjz_di" bpmnElement="Flow_0qkfpjz">
+        <di:waypoint x="1206" y="440" />
+        <di:waypoint x="1303" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1247" y="422" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_1srhckd_di" bpmnElement="DataInputAssociation_1srhckd">
+        <di:waypoint x="1041" y="345" />
+        <di:waypoint x="1041" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06qckin_di" bpmnElement="Flow_06qckin">
+        <di:waypoint x="915" y="440" />
+        <di:waypoint x="991" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="944" y="422" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aubnx9_di" bpmnElement="Flow_0aubnx9">
+        <di:waypoint x="890" y="465" />
+        <di:waypoint x="890" y="530" />
+        <di:waypoint x="932" y="530" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="898" y="495" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Group_1gexwym_di" bpmnElement="Group_1gexwym">
         <dc:Bounds x="140" y="80" width="260" height="360" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="225" y="87" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1fjxz8m_di" bpmnElement="TextAnnotation_1fjxz8m">
-        <dc:Bounds x="1025" y="80" width="250" height="185" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1lukjyb_di" bpmnElement="TextAnnotation_1lukjyb">
-        <dc:Bounds x="690" y="80" width="270" height="127" />
+        <dc:Bounds x="690" y="80" width="270" height="98" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0yjr0oy_di" bpmnElement="TextAnnotation_0yjr0oy">
         <dc:Bounds x="466" y="80" width="167" height="87" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0tn059s_di" bpmnElement="Event_EscalationFromAiFirewall">
-        <dc:Bounds x="782" y="462" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="701" y="490" width="78" height="40" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="DataInputAssociation_1srhckd_di" bpmnElement="DataInputAssociation_1srhckd">
-        <di:waypoint x="920" y="345" />
-        <di:waypoint x="920" y="400" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0fbmjga_di" bpmnElement="Flow_0fbmjga">
-        <di:waypoint x="970" y="440" />
-        <di:waypoint x="1035" y="440" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_02qf9ba_di" bpmnElement="Flow_02qf9ba">
-        <di:waypoint x="1060" y="465" />
-        <di:waypoint x="1060" y="530" />
-        <di:waypoint x="1112" y="530" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1072" y="493" width="15" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qkfpjz_di" bpmnElement="Flow_0qkfpjz">
-        <di:waypoint x="1085" y="440" />
-        <di:waypoint x="1182" y="440" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1126" y="422" width="18" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1s22j9e_di" bpmnElement="Flow_1s22j9e">
         <di:waypoint x="218" y="510" />
         <di:waypoint x="280" y="510" />
@@ -361,12 +404,12 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0kliake_di" bpmnElement="Flow_0kliake">
         <di:waypoint x="800" y="440" />
-        <di:waypoint x="870" y="440" />
+        <di:waypoint x="865" y="440" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0hzpji4_di" bpmnElement="Flow_0hzpji4">
-        <di:waypoint x="800" y="498" />
-        <di:waypoint x="800" y="530" />
-        <di:waypoint x="832" y="530" />
+        <di:waypoint x="750" y="498" />
+        <di:waypoint x="750" y="530" />
+        <di:waypoint x="792" y="530" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0odl2gn_di" bpmnElement="Flow_0odl2gn">
         <di:waypoint x="218" y="170" />
@@ -385,18 +428,18 @@ https://marketplace.camunda.com/en-US/apps/XXXXXX/ai-firewall-agent</bpmn:text>
         <di:waypoint x="440" y="370" />
         <di:waypoint x="440" y="415" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0n4u9c3_di" bpmnElement="Association_0n4u9c3">
-        <di:waypoint x="938" y="400" />
-        <di:waypoint x="1025" y="208" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_10oc60f_di" bpmnElement="Association_10oc60f">
         <di:waypoint x="750" y="400" />
-        <di:waypoint x="750" y="207" />
+        <di:waypoint x="750" y="178" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_01ila69_di" bpmnElement="Association_01ila69">
         <di:waypoint x="400" y="145" />
         <di:waypoint x="466" y="116" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_1fjxz8m_di" bpmnElement="TextAnnotation_1fjxz8m">
+        <dc:Bounds x="1146" y="80" width="250" height="185" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
